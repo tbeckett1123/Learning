@@ -1,0 +1,231 @@
+%parser template.lexer
+%namespace Template 
+
+/***********************************************************	
+************************************************************
+
+*************** identifier_type *****************************
+
+Symbol for holding the identifier type as a string.
+
+Routine Written By:		Rodney Kincaid
+Start Alpha Code Date:	10/11/06, 19:30
+End Alpha Code Date:	10/11/06, 21:05
+Routine Tested By:		Mark Rubenstein
+Routine Documented By:	Rodney Kincaid
+
+*************************************************************
+*************************************************************
+*/
+%symbol identifier_type { public string strType;	// String representation of type
+						 public string Type
+						 {
+							get { return strType; }
+							set { strType = value; }
+						 }
+						}
+
+program : statement_list   |    //{ Console.WriteLine("matched program"); };
+						;
+ 
+statement_list :  statement
+				|  statement statement_list //{ Console.WriteLine("matched statement_list"); };
+				;
+args_define : 
+		| LParen arg_list RParen	//{ Console.WriteLine("matched args_define"); }
+             ;
+
+arg_list : arg_def | arg_def COMMA arg_list  //{ Console.WriteLine("matched arg_list"); };
+					;
+					
+arg_def : variable_declare     //{ Console.WriteLine("matched arg_def"); }   
+		;
+ 
+ statement_declare : variable_declare
+				  | class_def
+				  | method_def //{ Console.WriteLine("matched statement_declare"); }
+				  ;
+
+/***********************************************************	
+************************************************************
+
+*************** variable_declare *****************************
+
+Production rule for a variable delcaration. Inserts the lexeme, scope, 
+and type into the symbol table. Does not currently implement array definitions.
+
+Routine Written By:		Rodney Kincaid
+Start Alpha Code Date:	10/11/06, 19:30
+End Alpha Code Date:	10/11/06, 21:05
+Routine Tested By:		Mark Rubenstein
+Routine Documented By:	Rodney Kincaid
+
+*************************************************************
+*************************************************************
+*/				  
+variable_declare :   identifier_type:t IDENTIFIER:id array_definition { if (!MainDriver.MainTester.symTable.Contains(null,id.Lexeme) )
+														{ 
+															   MainDriver.MainTester.symTable.Insert(null, id.Lexeme, t.Type, null);
+														}
+														else
+														{
+															Console.WriteLine("The variable has already been declared");  
+														} 
+														//Console.WriteLine("matched variable_declare"); 
+													  }
+				  ; 
+
+/***********************************************************	
+************************************************************
+
+*************** identifier_type *****************************
+
+Production rule for an identifier type. Currently only impelemented
+for the primitive types float, integer, and string. Stores the type
+in the identifier_type symbol's local variable.
+
+Routine Written By:		Rodney Kincaid
+Start Alpha Code Date:	10/11/06, 19:30
+End Alpha Code Date:	10/11/06, 21:05
+Routine Tested By:		Mark Rubenstein
+Routine Documented By:	Rodney Kincaid
+
+*************************************************************
+*************************************************************
+*/ 
+identifier_type : FLOAT:this_token  { strType = this_token.yyname; }		
+				|   INTEGER:this_token  { strType = this_token.yyname; }
+				|   STRING:this_token  { strType = this_token.yyname; }	
+				| name		/* we will NOT do this one for assignment 20 */
+				//{ Console.WriteLine("matched identifier_type"); }
+                   ;
+			
+array_definition :			
+                |  LBracket IntConst RBracket   //{ Console.WriteLine("matched array_definition"); }
+                ;
+                
+statement :  statement_declare EOL
+		  |  statement_execute EOL
+		  | identifier EOL
+		  | EOL //{ Console.WriteLine("matched statement"); }
+		  ;
+
+class_def : CLASS IDENTIFIER EOL  // You will later need code "here" to start a scope 
+					    // and to place class name in the symbol table.  But NOT
+					    // in assignment 20.
+				statement_list
+			END  //{ Console.WriteLine("matched class_def"); };
+				;
+
+method_and_type : IDENTIFIER
+			| IDENTIFIER IDENTIFIER
+			| FLOAT IDENTIFIER
+			| INTEGER IDENTIFIER
+			| STRING IDENTIFIER //{ Console.WriteLine("matched method_and_type"); }
+			;
+
+method_def : DEFINE method_and_type args_define EOL		/* we will later add code to do this..but NOT in assignment 20 */
+			    empty_possible
+			 END  //{ Console.WriteLine("matched method_define"); }
+			 ;
+
+empty_possible :
+				| statement_list //{ Console.WriteLine("matched empty_possible"); }
+				;
+statement_execute : for_stmt
+     | return_stmt
+     | if_stmt
+     | while_stmt
+     | assignment_stmt  //{ Console.WriteLine("just did assignment"); }
+     | input_stmt
+     | print_stmt
+     | block_stmt //{ Console.WriteLine("matched statement_execute"); }
+     ;
+ 
+block_stmt : DO EOL
+                    statement_list
+             END //{ Console.WriteLine("matched block_stmt"); }
+              ;
+for_stmt : FOR identifier ASSIGN simple_expression TO simple_expression block_stmt 
+			//{ Console.WriteLine("matched for_stmt"); }
+         ;
+ 
+
+return_stmt : RETURN
+            | RETURN expression //{ Console.WriteLine("matched return_stmt"); }
+            ;
+ 
+if_stmt : IF expression THEN EOL 
+               statement_list
+           else_stmt
+           END //{ Console.WriteLine("matched if_stmt"); }
+			;
+ 
+else_stmt :  
+		  | ELSE EOL
+                statement_list //{ Console.WriteLine("matched else_stmt"); }
+          ;
+ 
+while_stmt : WHILE expression block_stmt //{ Console.WriteLine("matched while_stmt"); }
+           ;
+ 
+assignment_stmt :  identifier ASSIGN expression //{ Console.WriteLine("matched assignment_stmt"); }
+		;
+name : IDENTIFIER
+		 |   name DOT IDENTIFIER //{ Console.WriteLine("matched name"); }
+		 ;
+		
+identifier : name
+			| name LBracket expression RBracket //{ Console.WriteLine("matched identifier"); }
+			;
+
+method_with_params_call :  name LParen method_param RParen
+			| name DOT NEW //{ Console.WriteLine("matched method_with_params_call"); }
+			;
+ 		
+method_param : expression
+			 | method_param COMMA expression //{ Console.WriteLine("matched method_param"); }
+               ;
+               
+input_stmt : INPUT identifier //{ Console.WriteLine("matched input_stmt"); };
+			;
+
+print_stmt : PRINT expression //{ Console.WriteLine("matched print"); }
+			;
+ 
+expression : simple_expression 
+           | simple_expression relop simple_expression //{ Console.WriteLine("matched expression"); }
+           ;
+ 
+
+simple_expression : term
+		  | PLUS term 
+		  | MINUS term
+          | simple_expression addop term //{ Console.WriteLine("matched simple expression"); }
+		  ;
+ 
+
+term : factor
+     | term mulop factor //{ Console.WriteLine("matched term"); };
+     ;
+
+factor : identifier
+       | IntConst
+       | FltConst
+       | StrConst
+       | method_with_params_call
+       | LParen expression RParen
+       | NOT factor //{ Console.WriteLine("matched factor"); }
+       ;            
+
+relop : EQ | NE | LT | LE | GE | GT //{ Console.WriteLine("matched relop"); };
+		;
+
+mulop : MUL | DIV | AND  //{ Console.WriteLine("matched mulop"); };
+		;
+ 
+
+addop : PLUS	
+      | MINUS	
+      | OR	//{ Console.WriteLine("matched addop"); }
+      ;

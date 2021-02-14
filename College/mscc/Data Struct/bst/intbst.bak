@@ -1,0 +1,35 @@
+# include <ctype.h>
+# include <fstream.h>
+# include "intbst.h"
+# include <stdlib.h>
+
+void main()
+	{
+   Btree tree;
+   char command;
+   int data;
+   bool flag = true;
+
+	ifstream fIn;
+   fIn.open("binary.txt", ios::nocreate);
+   if(fIn.fail())
+   	cout<<"* * * file error: could not find binary.txt * * *\n";
+   else
+   	{
+      while(!fIn.eof() && flag == true)
+      	{
+			fIn>>command;
+			command = tolower(command);
+         switch(command)
+         	{
+            case 'i': fIn>>data; tree.insert(data); break;
+            case 'd': fIn>>data; tree.del(data); break;
+            case 't': tree.traverse(); break;
+            case 'c': tree.clear(); break;
+            default: cout<<"Quit\n"; flag = false;
+            }
+         }
+      fIn.close();
+      }
+   system("PAUSE");
+   }

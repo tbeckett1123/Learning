@@ -1,0 +1,62 @@
+/*
+Program Name:	Database.exe
+Programmer:		Tim Beckett
+Date: 			4-25-03
+Language:	Borland C++
+Flowchart:	See Flowchart
+Function:	This is a database program.  you may enter as many records as you
+				would like.  each record must contain Name (format: last, first),
+            ssn (no dashes), a facaulty code (e - english, m - math, h - history
+            o - other), age, last year register (4 digit year), gender, and
+            marital status (s - single, m - married, w - widowed, d - devorced).
+            if the database file is not found when the program is loaded, the
+            program will force you to make the file.
+            There are eight functions you can perform: I - make a new student
+            record, D - delete a student record if the student has not register-
+            ed for at least two years, M - modify a student record to be located
+            by the student's ssn, P - display a student record located by
+            student's ssn, E - display the entire database, U - date the
+            database file (NOTE: if you don't update the database file before
+            you exit the program your changes to the database will not be saved)
+            and Q - exits the program.
+Inputs:     record data(name, ssn, facaulty code, age, sex, lyr, stat), menu
+				selection, under funtion M: which feilds to be edited and verify
+            changes, under function I: record data and enter another student,
+            under function D: student's ssn, under funtion p: student's ssn
+Outputs:    menu's and student records
+Other
+	Programs
+   	 Used:N/A
+Data
+Restrictions:each student record must have a ssn or the record will lost.
+				 lyr must be a four digit year
+             the name must be 20 chars or less including coma
+             the name must include a coma or it may not alphabatise propperly
+             ssn no dashes
+             faculty code must be one of the following: e, m, h, o
+             sex must be one of the following: m, f
+             stat must be one of the following: s, m, w, d
+Method:	 	if database file is not found getdata() is called and linked list is
+				created other wise the linked list is created from data in file
+      loop: print user menu is printed PAUSE PROGRAM waiting for user selection
+            perform user selection got to loop until user enters Q
+Printed
+	Output:	run program for printed outputs
+*/
+
+# include "linklist.h";
+
+void main()
+	{
+   void home();
+   int action(char, linkedList &);
+   bool close;
+   linkedList dataBase;
+
+   do
+   	{
+      home();
+      close = action(getchar(), dataBase);
+      }
+   while(close != true);
+   }

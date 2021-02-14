@@ -1,0 +1,451 @@
+Logfile was created onTue 09/12/2006 at 06:54 PM
+
+>>>type Program.cs
+/*  Programmer:     Timothy Beckett 
+ *  Class:          CSCI 4150       
+ *  Instructor:     Dr. Cripps      
+ *  Assignmt:       assign05        
+ *  Variables:      Name            Type                Location                Purpose
+ *                  args            string array        Program(main())         stores file name in element 0
+ *                  doubleSumSqr    double              Grades (StdDeviation()) store the sum of the squares
+ *                  doubleSqrSum    double              Grades (StdDeviation()) store the square of the sums
+ *                  FileStream      StreamReader        Program(ReadData())     stores the file stream
+ *                  grdScores       Grades              Program(Program)        stores scores and handles stats
+ *                  i               int                 Grades (Lowest())       store the low score
+ *                                                      Grades (Highest())      store the high score
+ *                  intArrGrades    int array           Grades (Grades)         store the scores
+ *                  intBar          int                 Grades (BarGraph())     Counter for printing bars
+ *                  intBuffer       int                 Program(ReadData())     stores the parsed (string to int) score
+ *                  intCnt          int                 Grades (NumberOf())     store the number of score
+ *                                                      Program(ReadData())     used to delimit line dump from reading data
+ *                  intGrd          int                 Grades (NubmerOf())     itorator for intArrGrades
+ *                  intI            int                 Grades (Constructor)    itorator for intArrGrades
+ *                  intIndex        int                 Grades (StdDeviation()) itorator for intArrGrades
+ *                  intItr          int                 Grades (BarGraph())     itorator for intArrGrades
+ *                  retVal          double              Grades (StdDeviation()) store the standard deviation
+ *                                  bool                Program(ReadData())     used to store success for reading data from file
+ *                  strFileName     string              Program(ReadData())     stores the file name
+ *                  strReadLine     string              Program(ReadData())     get data from FileStream
+ *                  total           double              Grades (Average())      store the sum
+ */
+
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.IO;
+using grade;
+
+namespace grade
+{
+    class Grades
+    {
+        public int[] intArrGrades;
+
+        //Class constructor
+        //intializes intArrGrades as an array of 101 ints
+        //and intializes each element to zero
+        public Grades()
+        {
+            intArrGrades = new int[101];
+
+            for (int intI = 0; intI < intArrGrades.Length; intI++)
+            {
+                intArrGrades[intI] = 0;
+            }
+        }
+
+        ~Grades()
+        { }
+
+        //returns the lowest grade
+        public int Lowest()
+        {
+            int i = 0;
+
+            for (; intArrGrades[i] == 0 && i < 100; i++);
+
+            return i;
+        }
+
+        //returns the highest grade
+        public int Highest()
+        {
+            int i = 100;
+
+            for (; intArrGrades[i] == 0 && i > 0; i--);
+
+            return i;
+        }
+
+        //returns the standard deviation
+        public double StdDeviation()
+        {
+            double doubleSumSqr = 0, doubleSqrSum = 0;
+
+            //tallies the sum of the squares
+            for(int intIndex = 0; intIndex < 101; intIndex++)
+            { 
+                    doubleSumSqr += intIndex*intIndex*intArrGrades[intIndex];
+            }
+            
+            //tallies the square of the sum
+            for (int intIndex = 0; intIndex < 101; intIndex++)
+            {
+                    doubleSqrSum += intArrGrades[intIndex]*intIndex;
+            }
+
+            doubleSqrSum *= doubleSqrSum;
+            //end square of the sum
+
+            double retVal = 0.0;
+
+            try
+            {
+                //find the standard deviation
+                retVal = Math.Sqrt(((NumberOf() * doubleSumSqr - doubleSqrSum) / (double)(NumberOf() * (NumberOf() - 1))));
+            }
+            catch(DivideByZeroException d)
+            {
+                //-1 is the default error message
+                retVal = -1.0;
+            }
+
+            return retVal;
+         
+        }
+
+        //returns the average score
+        public double Average()
+        {
+            double total = 0.0;
+
+            //find the sum of all the grades
+            for (int intItr = 0; intItr < 101; intItr++)
+            {
+                total += (double)(intItr * intArrGrades[intItr]);
+            }
+
+            //return the averave score   
+            return total/(double)NumberOf();
+        }
+
+        //return the total number of grades
+        public int NumberOf()
+        { 
+            int intCnt = 0;
+            
+            foreach(int intGrd in intArrGrades)
+            {
+            
+                intCnt += intGrd;
+            }
+            
+            return intCnt;
+        }
+
+        //produces a bar graph of the grades
+        public void BarGraph()
+        {
+            Console.Write("\n");
+            for(int intItr = Highest(); intItr >= Lowest(); intItr--)
+            {
+                Console.Write("{0,3} ", intItr);               
+
+                for (int intBar = 0; intBar < intArrGrades[intItr]; intBar++)
+                    Console.Write("%");
+
+                Console.Write("\n");
+            }
+        }
+
+    }
+}
+
+
+
+namespace assign05
+{
+    class Program
+    {
+        static Grades grdScores = new Grades();
+
+        public static void Main(string[] args)
+        {
+            if (ReadData(args[0]))
+            {
+                Console.Write("\n");
+                grdScores.BarGraph();
+                Console.Write("\nThe lowest score is " + grdScores.Lowest() + "\n");
+                Console.Write("The highest score is " + grdScores.Highest() + "\n");
+                Console.Write("The average score is {0:F1}\n", grdScores.Average());
+                Console.Write("The standard deviation is {0:F}\n", grdScores.StdDeviation());
+                Console.Write("The number of scores is " + grdScores.NumberOf() + "\n");
+            }
+            else
+                Console.Write("There were no grades to calculate.\n");
+
+          
+        } 
+
+        static bool ReadData(string strFilename)
+        {
+ 
+            StreamReader FileStream;
+            
+            try //try to open the file
+            {
+                FileStream = new StreamReader(strFilename);
+            }
+            catch (FileNotFoundException exc)
+            {
+                Console.WriteLine(exc.Message + "\nInput File Not Found");
+                return false;
+            }
+
+            string strReadLine;
+
+            strReadLine = FileStream.ReadLine(); //read intial value
+
+            int intBuffer = -2, intCnt = 0;
+            bool retValue = false;
+
+            
+            while (strReadLine != null)
+            {
+
+                try //Convert from string to Int
+                {
+                    intBuffer = Int32.Parse(strReadLine);
+
+                
+                }
+                catch (FormatException e)//set index out of range
+                {
+                    intBuffer = -2;
+                }
+
+                try //try to increament the score
+                {
+                    grdScores.intArrGrades[intBuffer]++;
+
+                    intCnt++;
+                    
+                    Console.Write("{0,4}",strReadLine); //write grade to console
+
+                    if (intCnt == 10)
+                    {
+                        Console.Write("\n");
+                        intCnt = 0;
+                    }
+                }
+                catch(IndexOutOfRangeException i)
+                {
+                    //do nothing
+                }
+
+           
+                strReadLine = FileStream.ReadLine();
+
+                retValue = true;    
+            }    
+            
+            FileStream.Close();
+
+            return retValue;
+        }
+    }
+}
+
+>>>assign05 grades0
+  98  89  89  89  89  89  70  96  98  95
+  97  80  70  88  90  97  96  95  98  93
+  90  88  80  86  85  88  75  89  87  91
+  93  90  88  80  86  93  90  88  80  86
+  85  88  75  89  87  95  97  80  70  88
+  90  97  96  95  98  95  97  80  70  88
+  90  97  96  95  98  93  90  88  96  98
+  95  97  80  70  88  90  97  96  95  98
+  93  90  88  80  86  85  88  75  89  87
+  91  93  90  88  80  86  80  70  88  90
+  97  96  95  98  93  90  88  80  86  85
+  88  75  89  87  91  93  90  88  80  86
+  93  90  88  80  86  85  88  75  89  87
+  95  97  80  70  88  90  97  96  95  98
+  95  97  80  70  88  90
+
+ 98 %%%%%%%%%
+ 97 %%%%%%%%%%%%
+ 96 %%%%%%%%
+ 95 %%%%%%%%%%%%
+ 94 
+ 93 %%%%%%%%%
+ 92 
+ 91 %%%
+ 90 %%%%%%%%%%%%%%%%
+ 89 %%%%%%%%%%
+ 88 %%%%%%%%%%%%%%%%%%%%%
+ 87 %%%%%
+ 86 %%%%%%%%
+ 85 %%%%%
+ 84 
+ 83 
+ 82 
+ 81 
+ 80 %%%%%%%%%%%%%%%
+ 79 
+ 78 
+ 77 
+ 76 
+ 75 %%%%%
+ 74 
+ 73 
+ 72 
+ 71 
+ 70 %%%%%%%%
+
+The lowest score is 70
+The highest score is 98
+The average score is 88.5
+The standard deviation is 7.30
+The number of scores is 146
+
+>>>assign05 grades1
+There were no grades to calculate.
+
+>>>assign05 grades2
+   0   0   0   4   6
+
+  6 %
+  5 
+  4 %
+  3 
+  2 
+  1 
+  0 %%%
+
+The lowest score is 0
+The highest score is 6
+The average score is 2.0
+The standard deviation is 2.83
+The number of scores is 5
+
+>>>assign05 grades3
+   0   6  12
+
+ 12 %
+ 11 
+ 10 
+  9 
+  8 
+  7 
+  6 %
+  5 
+  4 
+  3 
+  2 
+  1 
+  0 %
+
+The lowest score is 0
+The highest score is 12
+The average score is 6.0
+The standard deviation is 6.00
+The number of scores is 3
+
+>>>assign05 grades4
+   0   4   4   4   8
+
+  8 %
+  7 
+  6 
+  5 
+  4 %%%
+  3 
+  2 
+  1 
+  0 %
+
+The lowest score is 0
+The highest score is 8
+The average score is 4.0
+The standard deviation is 2.83
+The number of scores is 5
+
+>>>assign05 grades5
+   0   0   0   0   0   0   0   0   0
+
+  0 %%%%%%%%%
+
+The lowest score is 0
+The highest score is 0
+The average score is 0.0
+The standard deviation is 0.00
+The number of scores is 9
+
+>>>assign05 grades6
+ 100 100 100 100 100 100 100 100
+
+100 %%%%%%%%
+
+The lowest score is 100
+The highest score is 100
+The average score is 100.0
+The standard deviation is 0.00
+The number of scores is 8
+
+>>>assign05 grades7
+  99  89  89  89  89  89  70  96  98  95
+  97  80  70  88  90  97  96  95  98  93
+  90  88  80  86  85  88  75  89  87  91
+  93  90  88  80  86  93  90  88  80  86
+  85  88  75  89  87  95  97  80  70  88
+  90  97  96  95  98  95  97  80  70  88
+  90  97  96  95  98  93  90  88  80  86
+  89  70  96  98  95  97  80  70  88  90
+  97  96  95  98  93  90  88  80  86  85
+  88  75  89  87  91  93  90  88  80  86
+  80  70  88  90  97  96  95  98  93  90
+  88  80  86  85  88  75  89  87  91  93
+  90  88  80  86  93  90  88  80  86  85
+  88  75  89  87  95  97  90  97  96  95
+  97  97  88  90
+
+ 99 %
+ 98 %%%%%%%
+ 97 %%%%%%%%%%%%%
+ 96 %%%%%%%%
+ 95 %%%%%%%%%%%
+ 94 
+ 93 %%%%%%%%%
+ 92 
+ 91 %%%
+ 90 %%%%%%%%%%%%%%%%
+ 89 %%%%%%%%%%%
+ 88 %%%%%%%%%%%%%%%%%%%%
+ 87 %%%%%
+ 86 %%%%%%%%%
+ 85 %%%%%
+ 84 
+ 83 
+ 82 
+ 81 
+ 80 %%%%%%%%%%%%%%
+ 79 
+ 78 
+ 77 
+ 76 
+ 75 %%%%%
+ 74 
+ 73 
+ 72 
+ 71 
+ 70 %%%%%%%
+
+The lowest score is 70
+The highest score is 99
+The average score is 88.7
+The standard deviation is 7.14
+The number of scores is 144
+
+>>>exit
+

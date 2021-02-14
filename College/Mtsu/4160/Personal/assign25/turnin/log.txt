@@ -1,0 +1,590 @@
+Logfile was created onWed 11/01/2006 at 12:44 PM
+
+>>>type name.txt
+Name:		Timothy Beckett
+Assignment:	15
+Instructor:	Dr. Cripps
+Class:		CSCI 4160
+
+>>>type template.lexer
+%lexer
+%namespace Template 
+
+
+%define id [a-zA-Z][a-zA-Z0-9_]*
+%define ws [ \t\n\r]+
+%define digits [0-9]+
+%define string1 ["]([ \t\r\n]|[!]|[#-~])*["]
+%define string2 [']([ \t\r\n]|[!]|[#-&]|[(-~])*[']
+%define letters  [a-zA-Z]+
+%define EOL [\r\n]
+%define error [^(0-9a-zA-Z"\.\t\r\n;{EOF})]
+%declare{ public int mycount; }
+
+%token INTID;
+%token FLTID;
+%token WORD;
+%token STRID;
+%token INTCONST;
+%token FLTCONST;
+%token ID;
+%token ERROR;
+%token IDENTIFIER{		public string strLexeme;
+		 				public string Lexeme
+		 				{
+							get{ return strLexeme; }
+							set{ strLexeme = value;}
+						} 
+				  };
+%token name {	public string strType;
+				public string Type
+				{
+					get { return strType; }
+					set { strType = value; }
+				}
+			};
+
+
+{ws}											; 								
+B												%B		{ yybegin("FNAME"); }
+C												%C 
+D												%D 
+E												%E 
+G												%G 
+I												%I 
+L												%L		{ yybegin("FNAME"); }
+P												%P 
+S												%S		{ yybegin("FNAME"); }
+T												%T		
+V												%V 
+{string1}										%name	{ Type = yytext; }
+{string2}										%name	{ Type = yytext; }
+[a-zA-Z_][a-zA-Z0-9_]*							%name	{ Type = yytext; }
+([0-9]+[E|e]([\+]|[\-])?[0-9]+)					%name	{ Type = yytext; }
+([(0-9)]+[\.][(0-9)]*)|([(0-9)]*[\.][(0-9)]+)	%name	{ Type = yytext; }
+[0-9]+											%name	{ Type = yytext; }
+{EOL}											%EOL
+{EOF}											%EOL
+[/]"*"													{yybegin("COMMENT");yyl.mycount=1;}
+[/]"/"													{yybegin("LCOMMENT");}
+
+<COMMENT>	[/]"*"	    {yyl.mycount++;}
+<COMMENT>	"*/"		{yyl.mycount--; if (yyl.mycount == 0) yybegin("YYINITIAL");}
+<COMMENT>	{EOF}		%EOL  
+<COMMENT>	.|\n|\r		;
+
+<LCOMMENT>  [\r\n]	{yybegin("YYINITIAL");}
+<LCOMMENT>	[/]"*"	{yybegin("COMMENT");yyl.mycount=1;}
+<LCOMMENT>  {EOF}	%EOL 
+<LCOMMENT>	.		;
+
+<FNAME>		[a-zA-Z_][a-zA-Z0-9_]* %name { Type = yytext; yybegin("YYINITIAL"); }
+<FNAME>		{ws}				   ;
+
+
+>>>type template.parser
+%parser template.lexer
+%namespace Template
+
+program : cmd eol
+		| cmd eol program
+		| eol
+		| cmd
+		;
+
+cmd : b
+	  program
+	| e
+	  program	
+	| c
+	  program
+	| d
+	  program
+	| i
+	  program
+	| p
+	  program
+	| g
+	  program
+	;
+
+eol : EOL 
+    | EOL eol
+    ;
+
+b : B name:s { MainDriver.MainTester.symTable.BeginScope(s.Type);		                  
+			 }
+  ;
+
+c : C S name:s L name:n { if(MainDriver.MainTester.symTable.Contains(s.Type, n.Type)) 
+						  {
+							Console.Write(n.Type + " was found\n");
+						  }
+						  else
+						  {
+							Console.Write(n.Type + " was not found\n");
+						  }
+			 		    }
+  | C L name:n			{ if(MainDriver.MainTester.symTable.Contains(
+						  MainDriver.MainTester.symTable.returnScope(),
+						  n.Type))
+						  {
+							Console.Write(n.Type + " was found\n");
+						  }
+						  else
+						  {
+							Console.Write(n.Type + " was not found\n");
+						  }
+						  
+						}
+  ;
+  
+d : D { MainDriver.MainTester.symTable.Dump(); 
+      }
+  ;
+  
+e : E { MainDriver.MainTester.symTable.EndScope();		
+      }
+  ;
+
+i : I S name:s L name:n T name:t		  { try
+											{				
+												MainDriver.MainTester.symTable.Insert(s.Type, n.Type, t.Type, null);												
+											}
+											catch
+											{
+												Console.Write("The item is already in the table\n");
+											}
+                                          }	
+  | I S name:s L name:n T name:t V name:v { try
+											{
+												if(!(t.Type.CompareTo("FltArr") == 0 || t.Type.CompareTo("IntArr") == 0 || t.Type.CompareTo("StrArr") == 0))
+												{
+													MainDriver.MainTester.symTable.Insert(s.Type, n.Type, t.Type, v.Type);
+												}
+												else
+												{
+													MainDriver.MainTester.symTable.Insert(s.Type, n.Type, t.Type, new string[Int32.Parse(v.Type)]);												
+												}
+											}
+											catch
+											{
+												Console.Write("The item is already in the table\n");
+											}   
+                                          }
+  ;
+  
+  
+p : P S name:s L name:n T name:t V name:v  { try
+											{
+												MainDriver.MainTester.symTable.Put(s.Type, n.Type, t.Type, v.Type);
+											}
+											catch
+											{
+												Console.Write("The item is not in the table\n");
+											}
+										  }
+  | P S name:s L name:n T name:t V name:v name:v1 
+										  { try
+											{
+												MainDriver.MainTester.symTable.Put(s.Type, n.Type, t.Type, v1.Type, Int32.Parse(v.Type));
+											}
+											catch
+											{
+												Console.Write("The item is not in the table\n");
+											}
+										   }											  
+  | P S name:s L name:n T name:t		 { try
+											{
+												MainDriver.MainTester.symTable.Put(s.Type, n.Type, t.Type, null);
+											}
+											catch
+											{
+												Console.Write("The item is not in the table\n");
+											}
+										  }
+  | P S name:s L name:n V name:v		 { try
+											{
+												MainDriver.MainTester.symTable.Put(s.Type, n.Type, null, v.Type);
+											}
+											catch
+											{
+												Console.Write("The item is not in the table\n");
+											}
+										  }
+  | P S name:s L name:n V name:v name:v1 { try
+											{
+												MainDriver.MainTester.symTable.Put(s.Type, n.Type, null, v1.Type, Int32.Parse(v.Type));
+											}
+											catch
+											{
+												Console.Write("The item is not in the table\n");
+											}
+										  }
+										  
+  | P L name:n T name:t V name:v		 { try
+											{
+												MainDriver.MainTester.symTable.Put(
+												MainDriver.MainTester.symTable.returnScope(),
+												n.Type, t.Type, v.Type);
+											}
+											catch
+											{
+												Console.Write("The item is not in the table\n");
+											}
+										  }
+
+  | P L name:n T name:t V name:v name:v1 { try
+											{
+												MainDriver.MainTester.symTable.Put(
+												MainDriver.MainTester.symTable.returnScope(),
+												n.Type, t.Type, v1.Type, Int32.Parse(v.Type));
+											}
+											catch
+											{
+												Console.Write("The item is not in the table\n");
+											}
+										  }   
+
+
+										     
+  | P L name:n T name:t					 { try
+											{
+												MainDriver.MainTester.symTable.Put(
+												MainDriver.MainTester.symTable.returnScope(),
+												n.Type, t.Type, null);
+											}
+											catch
+											{
+												Console.Write("The item is not in the table\n");
+											}
+										  }   
+  | P L name:n V name:v					 { try
+											{
+												MainDriver.MainTester.symTable.Put(
+												MainDriver.MainTester.symTable.returnScope(),
+												n.Type, null, v.Type);
+											}
+											catch
+											{
+												Console.Write("The item is not in the table\n");
+											}
+										  }   
+  
+  | P L name:n V name:v	name:v1			 { try
+											{
+												MainDriver.MainTester.symTable.Put(
+												MainDriver.MainTester.symTable.returnScope(),
+												n.Type, null, v1.Type, Int32.Parse(v.Type));
+											}
+											catch
+											{
+												Console.Write("The item is not in the table\n");
+											}
+										  }   
+
+  
+  | P L name:n							  //do nothing on these two cases.
+  | P S name:s L name:n
+  ;
+  
+g : G S name:g L name:l V				{ try
+										  {
+												object temp = MainDriver.MainTester.symTable.GetValue(g.Type, l.Type);
+												
+												Console.Write(temp.ToString() + "\n");
+										  }
+										  catch
+										  {
+												Console.Write("The item is not in the table\n");
+										  }											
+										}
+  | G S name:g L name:l V name:v		{ try
+										  {
+												object temp = MainDriver.MainTester.symTable.GetValue(g.Type, l.Type, Int32.Parse(v.Type));
+												
+												Console.Write(temp.ToString() + "\n");
+												
+										  }
+										  catch
+										  {
+												Console.Write("The item is not in the table\n");
+										  }											
+										}
+  | G S name:g L name:l T				{ try
+										  {
+												SymbolTable.Bucket temp = MainDriver.MainTester.symTable.Get(g.Type, l.Type);
+												
+												Console.Write(temp.Scope + " " + temp.Lexeme + " " + temp.Type + " " + temp.Value + "\n");
+										  }
+										  catch
+										  {
+										  		Console.Write("The item is not in the table\n");
+										  }
+  
+										}
+  | G L name:l V						{ try
+										  {
+												object temp = MainDriver.MainTester.symTable.GetValue(
+												MainDriver.MainTester.symTable.returnScope(),
+												l.Type);
+												
+												Console.Write(temp.ToString() + "\n");
+												
+										  }
+										  catch
+										  {
+												Console.Write("The item is not in the table\n");
+										  }											
+										}
+  | G L name:l V name:v					{ try
+										  {
+												object temp = MainDriver.MainTester.symTable.GetValue(
+												MainDriver.MainTester.symTable.returnScope(),
+												l.Type, Int32.Parse(v.Type));
+												
+												Console.Write(temp.ToString() + "\n");
+												
+										  }
+										  catch
+										  {
+												Console.Write("The item is not in the table\n");
+										  }											
+										}
+  | G L name:l T						{ try
+										  {
+												SymbolTable.Bucket temp = MainDriver.MainTester.symTable.Get(
+												MainDriver.MainTester.symTable.returnScope(),
+												l.Type);
+												
+												Console.Write(temp.Scope + " " + temp.Lexeme + " " + temp.Type + " " + temp.Value + "\n");
+										  }
+										  catch
+										  {
+										  		Console.Write("The item is not in the table\n");
+										  }
+  
+										}
+  ;
+  
+>>>type source1.txt
+B main1
+C S main1 L A
+I S main1 L A T IntId
+C S main1 L B
+I S main1 L B T IntArr V 12
+C S main1 L C
+I S main1 L A T IntId
+D
+B main2
+C S main2 L X
+I S main2 L X T IntId
+C S main2 L C
+I S main2 L A T IntId
+P L A V 4
+P L C V 5
+D
+G L A V
+G L C V
+P L X V 9
+G L X V
+P L B V 3 9
+G L C V
+P S main1 L C V 5
+G S main1 L C
+G S main1 L C T
+G S main1 L C V
+G L B V 20
+G L B V -1
+D
+E
+B main3
+C S main3 L A
+I S main3 L A T IntId
+C S main3 L Y
+I S main3 L Y T IntId
+P L A V 7
+P L Y V 9
+G L A V
+G L Y V
+G L X V
+P L C V 25
+G L B V 3
+E
+G L A V
+G L A // this is an error
+E
+
+>>>type source2.txt
+B main1
+C S main1 L A
+I S main1 L A T StrId
+D
+P L A V "abc's"
+G L A V
+D
+C S main1 L B
+I S main1 L B T IntArr V 10
+D
+P L B T IntArr V 1 2 
+D
+G L B V 1
+E
+
+>>>type source3.txt
+B main1
+C S main1 L A
+I S main1 L A T StrId
+D
+P L A V "abc's"
+G L A V
+D
+C S main1 L B
+I S main1 L B T IntArr V 10
+D
+P L B V 1 2 
+D
+G L B V 1
+B main2
+I S main2 L A T FltId
+D
+P L A V 12E4
+G L A V
+D
+I S main2 L B T IntArr V 10
+D
+P L B V 1 2 
+D
+G L B V 1
+G L A
+G S main1 L A
+G S main1 L B V 1
+E 
+E
+
+>>>MainDriver source1.txt
+A was not found
+B was not found
+C was not found
+The item is already in the table
+
+
+Key                   Scope      Lexeme     Type       Value(s)                        
+main1:B               main1      B          IntArr     0 0 0 0 0 0 0 0 0 0 0 0 
+main1:A               main1      A          IntId      null
+X was not found
+C was not found
+The item is not in the table
+
+
+Key                   Scope      Lexeme     Type       Value(s)                        
+main2:X               main2      X          IntId      null
+main1:B               main1      B          IntArr     0 0 0 0 0 0 0 0 0 0 0 0 
+main2:A               main2      A          IntId      4
+main1:A               main1      A          IntId      null
+4
+The item is not in the table
+9
+The item is not in the table
+The item is not in the table
+The item is not in the table
+Line 25, char 2: syntax error
+
+
+Key                   Scope      Lexeme     Type       Value(s)                        
+main2:X               main2      X          IntId      9
+main1:B               main1      B          IntArr     0 0 0 0 0 0 0 0 0 0 0 0 
+main2:A               main2      A          IntId      4
+main1:A               main1      A          IntId      null
+
+>>>MainDriver source2.txt
+A was not found
+
+
+Key                   Scope      Lexeme     Type       Value(s)                        
+main1:A               main1      A          StrId      null
+"abc's"
+
+
+Key                   Scope      Lexeme     Type       Value(s)                        
+main1:A               main1      A          StrId      "abc's"
+B was not found
+
+
+Key                   Scope      Lexeme     Type       Value(s)                        
+main1:B               main1      B          IntArr     0 0 0 0 0 0 0 0 0 0 
+main1:A               main1      A          StrId      "abc's"
+
+
+Key                   Scope      Lexeme     Type       Value(s)                        
+main1:B               main1      B          IntArr     0 2 0 0 0 0 0 0 0 0 
+main1:A               main1      A          StrId      "abc's"
+2
+
+
+Key                   Scope      Lexeme     Type       Value(s)                        
+main1:B               main1      B          IntArr     0 2 0 0 0 0 0 0 0 0 
+main1:A               main1      A          StrId      "abc's"
+
+>>>MainDriver source3.txt
+A was not found
+
+
+Key                   Scope      Lexeme     Type       Value(s)                        
+main1:A               main1      A          StrId      null
+"abc's"
+
+
+Key                   Scope      Lexeme     Type       Value(s)                        
+main1:A               main1      A          StrId      "abc's"
+B was not found
+
+
+Key                   Scope      Lexeme     Type       Value(s)                        
+main1:B               main1      B          IntArr     0 0 0 0 0 0 0 0 0 0 
+main1:A               main1      A          StrId      "abc's"
+
+
+Key                   Scope      Lexeme     Type       Value(s)                        
+main1:B               main1      B          IntArr     0 2 0 0 0 0 0 0 0 0 
+main1:A               main1      A          StrId      "abc's"
+2
+
+
+Key                   Scope      Lexeme     Type       Value(s)                        
+main1:B               main1      B          IntArr     0 2 0 0 0 0 0 0 0 0 
+main2:A               main2      A          FltId      null
+main1:A               main1      A          StrId      "abc's"
+12E4
+
+
+Key                   Scope      Lexeme     Type       Value(s)                        
+main1:B               main1      B          IntArr     0 2 0 0 0 0 0 0 0 0 
+main2:A               main2      A          FltId      12E4
+main1:A               main1      A          StrId      "abc's"
+
+
+Key                   Scope      Lexeme     Type       Value(s)                        
+main2:B               main2      B          IntArr     0 0 0 0 0 0 0 0 0 0 
+main1:B               main1      B          IntArr     0 2 0 0 0 0 0 0 0 0 
+main2:A               main2      A          FltId      12E4
+main1:A               main1      A          StrId      "abc's"
+
+
+Key                   Scope      Lexeme     Type       Value(s)                        
+main2:B               main2      B          IntArr     0 2 0 0 0 0 0 0 0 0 
+main1:B               main1      B          IntArr     0 2 0 0 0 0 0 0 0 0 
+main2:A               main2      A          FltId      12E4
+main1:A               main1      A          StrId      "abc's"
+2
+Line 26, char 2: syntax error
+
+
+Key                   Scope      Lexeme     Type       Value(s)                        
+main2:B               main2      B          IntArr     0 2 0 0 0 0 0 0 0 0 
+main1:B               main1      B          IntArr     0 2 0 0 0 0 0 0 0 0 
+main2:A               main2      A          FltId      12E4
+main1:A               main1      A          StrId      "abc's"
+
+>>>exit
+

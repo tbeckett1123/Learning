@@ -1,0 +1,77 @@
+#include <iostream.h>
+#include <stdio.h>
+#include <iomanip.h>
+#include <String.h>
+#include <fstream.h>
+
+typedef char String40[41];
+struct DateType
+	{
+   int mo;
+   int day;
+   int yr;
+	};
+
+enum PropertyType{home, automobile, appliance, furniture, other};
+enum HouseType {ranch, twoStory, split, condo};
+enum ColorType {red, orange, yellow, green, blue, brown, purple, white, black};
+enum CarType {sedan, staWagon, van, sports, offRoad, pickup};
+enum ApplianceType {range, dishwasher, washer, dryer};
+enum FurnitureType {sofa, table, chair, bed, desk, cabinet};
+
+struct PropertyInfoType
+	{
+   DateType purchaseDate;
+   int hundredsVal;
+   PropertyType article;
+   union
+   	{
+      struct
+      	{
+         HouseType style;
+         int sqFeet;
+         DateType dateBuilt;
+         }house;
+      struct
+      	{
+         CarType style;
+         ColorType color;
+         }car;
+      struct
+      	{
+         ApplianceType kind;
+         ColorType color;
+	      }appli;
+      struct
+      	{
+         FurnitureType kind;
+         }furn;
+      struct
+      	{
+         String40 descrip;
+         }oth;
+      };
+   };
+
+ostream& operator<<(ostream&, DateType);
+ostream& operator<<(ostream&, String40);
+ostream& operator<<(ostream&, PropertyType);
+ostream& operator<<(ostream&, HouseType);
+ostream& operator<<(ostream&, ColorType);
+ostream& operator<<(ostream&, CarType);
+ostream& operator<<(ostream&, ApplianceType);
+ostream& operator<<(ostream&, FurnitureType);
+ostream& operator<<(ostream&, PropertyInfoType);
+
+class Property
+	{
+	private:
+   PropertyInfoType majorPossession[200];
+	PropertyInfoType favoritePossession;
+   int count;
+	public:
+   Property();
+   void sort(), setFavorite(int), writeFile();
+	};
+
+

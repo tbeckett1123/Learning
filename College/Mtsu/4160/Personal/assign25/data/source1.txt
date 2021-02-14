@@ -1,0 +1,46 @@
+B main1
+C S main1 L A
+I S main1 L A T IntId
+C S main1 L B
+I S main1 L B T IntArr V 12
+C S main1 L C
+I S main1 L A T IntId
+D
+B main2
+C S main2 L X
+I S main2 L X T IntId
+C S main2 L C
+I S main2 L A T IntId
+P L A V 4
+P L C V 5
+D
+G L A V
+G L C V
+P L X V 9
+G L X V
+P L B V 3 9
+G L C V
+P S main1 L C V 5
+G S main1 L C
+G S main1 L C T
+G S main1 L C V
+G L B V 20
+G L B V -1
+D
+E
+B main3
+C S main3 L A
+I S main3 L A T IntId
+C S main3 L Y
+I S main3 L Y T IntId
+P L A V 7
+P L Y V 9
+G L A V
+G L Y V
+G L X V
+P L C V 25
+G L B V 3
+E
+G L A V
+G L A // this is an error
+E

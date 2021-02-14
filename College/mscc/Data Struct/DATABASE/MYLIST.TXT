@@ -1,0 +1,47 @@
+   Name: Williams Montel
+    SSN: 123456789
+Faculty: E
+    age: 36
+    sex: M
+    LYR: 1995
+   STAT: d
+
+   Name: Beckett Tim
+    SSN: 548834275
+Faculty: H
+    age: 23
+    sex: M
+    LYR: 2003
+   STAT: s
+
+   Name: Brown James
+    SSN: 987654321
+Faculty: M
+    age: 80
+    sex: M
+    LYR: 1956
+   STAT: w
+
+   Name: Doe Jane
+    SSN: 987654320
+Faculty: O
+    age: 36
+    sex: F
+    LYR: 1989
+   STAT: s
+
+   Name: Graham Rosie
+    SSN: 123456780
+Faculty: E
+    age: 40
+    sex: F
+    LYR: 1996
+   STAT: m
+
+   Name: Grant Ginger
+    SSN: 987321654
+Faculty: H
+    age: 21
+    sex: F
+    LYR: 2001
+   STAT: s

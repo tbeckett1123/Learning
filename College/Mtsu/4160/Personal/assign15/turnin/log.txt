@@ -1,0 +1,586 @@
+Logfile was created onWed 10/04/2006 at 04:07 AM
+
+>>>type name.txt
+Name:		Timothy Beckett
+Assignment:	15
+Instructor:	Dr. Cripps
+Class:		CSCI 4160
+
+>>>type MainTester.cs
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.IO;
+using Tools;
+using Example;
+using SymbolTable;
+
+
+namespace assign15
+{
+
+
+    namespace MainDriver
+    {
+        public class MainTester
+        {
+            public static classSymbolTable symTable = new classSymbolTable();
+            public static void Main(string[] args)
+            {
+                // we need an object, otherwise we won't be able
+                // to refer back to it when we are in the lexer.
+                new MainTester().parse(args[0]);
+            }
+            void parse(string s)
+            {
+                Lexer lexer = new tokens();
+                lexer.Start(new StreamReader(s));
+                TOKEN mytoken;
+                try
+                {
+                    while ((mytoken = lexer.Next()) != null)
+                    {
+                        //(mytoken.Pos);
+                        Console.WriteLine("{0,-20}, {1,-20}, {2,-20}, {3,-20}", 
+                            mytoken.Pos,
+                            mytoken.yyname,
+                            mytoken.yytext,
+                            (mytoken.yylval == null) ? "No Value" : mytoken.yylval);
+                    }
+                }
+                catch
+                {
+                    Console.WriteLine("A regural expresion error has occured.\nShutting down the lexer");
+                }
+            }
+        }
+    }
+
+}
+
+>>>type example.lexer
+%lexer   // Example found in assign15
+%namespace Example ;
+/* This lexer demos nested comments plus 
+commands of the form  "set  integer end"
+and "set letters end"
+It is not intended to be a cooker cutter for the assignment!!
+*/
+%define id [a-zA-Z][a-zA-Z0-9_]*
+%define ws [ \t\r\n]+
+%define digits [0-9]+
+%define strings ["]([ \t\r\n]|[!]|[#-~])*["]
+%define letters  [a-zA-Z]+
+%define dot [\.]
+%define error [^(0-9a-zA-Z"\.\t\r\n;{EOF})]
+%token INT;
+%token WORD;
+%token STRING;
+%token CONSTINT;
+%token CONSTFLT;
+%token DOT;
+%token LOGICALEQUAL;
+%token LOGICALAND;
+%token LOGICALOR;
+%token ID;
+%token ERROR;
+
+%token IDENTIFIER { public string strLexeme;
+ 			  public string Lexeme
+                    {
+				get { return strLexeme; }
+				set { strLexeme = value;}
+			   } 
+			} ;
+
+%declare{
+			public int mycount;
+   }
+U"set"			%SET {yybegin("SET");}
+{strings}		%STRING
+
+[(0-9)]+	%CONSTINT
+([(0-9)]+[\.][(0-9)]*)|([(0-9)]*[\.][(0-9)]+)	%CONSTFLT
+"="				%EQUAL
+"&&"					%LOGICALAND
+"||"					%LOGICALOR
+"=="					%LOGICALEQUAL
+{dot}					%DOT
+{ws}				;
+[/]"*"			{yybegin("COMMENT");yyl.mycount=1;}
+[/]"/"			{yybegin("LCOMMENT");}
+U"if"				%IF
+U"then"			%THEN
+U"else"			%ELSE
+U"end"			%END
+{id}				%ID
+{EOF}	{Console.Write("EOF\n");}
+{error} %ERROR
+";"				%SEMI
+<COMMENT>	[/]"*"	{yyl.mycount++;}
+<COMMENT>	"*/"		{yyl.mycount--; if (yyl.mycount == 0) yybegin("YYINITIAL");}
+<COMMENT>	{EOF}		{Console.Write("EOF in block comment\n");}
+<COMMENT>	.|\n|\r	;
+<LCOMMENT>  "\n"	{yybegin("YYINITIAL");}
+<LCOMMENT>	"\r"	{yybegin("YYINITIAL");}
+<LCOMMENT>	[/]"*"	{yybegin("COMMENT");yyl.mycount=1;}
+<LCOMMENT>  {EOF}	{Console.Write("EOF in line comment\n");}
+<LCOMMENT>	.		;
+<SET>		U"end"	%END {yybegin("YYINITIAL");}
+<SET>		{ws}		;
+<SET>		{digits}	%INT
+<SET>		{letters}	%LETTERS
+<SET>		[^ \n\r]+	{yybegin("YYINITIAL");
+					yyl.yytext=yyl.yytext.Trim();
+					try {
+						Int32.Parse(yyl.yytext);
+						return new INT();
+					}
+					catch { };
+					return new WORD();			
+				}
+
+>>>type test.txt
+abc
+1 234 567890 123123567
+123124
+12 345 567 900
+xyz=456
+Read this
+READ Then
+ReAd tHeN
+"abc string"
+"abc string's"
+"two strings" abc "second string"
+/*  // this line
+	//		*/
+/* next /* second */ last */
+if id = this then next end
+if id = this one then several if words end
+if id=this onethen then several end
+if ident     =thenselves Then two end
+if abc = this then then end
+if abc =    456    then then end
+if       abc=thisthen thennext then then then end
+if abc      =456 orthen |abc=the then then end
+if abc=   t h e n     &  &&  then = nextthen two three "then" then then then end
+if abc =   h    ||     xy   =  next   &&   z=34then well then what end
+if id=x||id=this&&id=two words then next two end
+if then    ==  then next then well == this and that then those 
+if ident     =thenselves && this | that & now ThEn two end
+if ident     =thenselves&x3=123 North||x4=North 123||x3    
+= 
+123 
+x5
+==
+them || x6   
+=   Then then thEM two "end" end
+if id = =this =then= then next && end // end
+end
+
+if id = this then next end if next=rest then end
+if id == this then next end if next=rest then end
+/* 
+/* */ /* /* /* /* */ /*  
+*/ 
+*/ */ df ksdhf */ 
+*/ next
+/* check the dot operator */
+12.456 .2345  7890. 1 . 2 . 3 ..  ...e.bccc.m..e .e a.
+/*this will catch missing end of quote*/ "string's"  "second
+/* this one will catch missing end /* of comment */
+
+>>>MainDriver test.txt
+Line 1, char 1      , ID                  , abc                 , No Value            
+Line 2, char 2      , CONSTINT            , 1                   , No Value            
+Line 2, char 4      , CONSTINT            , 234                 , No Value            
+Line 2, char 8      , CONSTINT            , 567890              , No Value            
+Line 2, char 15     , CONSTINT            , 123123567           , No Value            
+Line 3, char 2      , CONSTINT            , 123124              , No Value            
+Line 4, char 2      , CONSTINT            , 12                  , No Value            
+Line 4, char 5      , CONSTINT            , 345                 , No Value            
+Line 4, char 9      , CONSTINT            , 567                 , No Value            
+Line 4, char 13     , CONSTINT            , 900                 , No Value            
+Line 5, char 2      , ID                  , xyz                 , No Value            
+Line 5, char 5      , EQUAL               , =                   , No Value            
+Line 5, char 6      , CONSTINT            , 456                 , No Value            
+Line 6, char 2      , ID                  , Read                , No Value            
+Line 6, char 7      , ID                  , this                , No Value            
+Line 7, char 2      , ID                  , READ                , No Value            
+Line 7, char 7      , THEN                , Then                , No Value            
+Line 8, char 2      , ID                  , ReAd                , No Value            
+Line 8, char 7      , THEN                , tHeN                , No Value            
+Line 9, char 2      , STRING              , "abc string"        , No Value            
+Line 10, char 2     , STRING              , "abc string's"      , No Value            
+Line 11, char 2     , STRING              , "two strings"       , No Value            
+Line 11, char 16    , ID                  , abc                 , No Value            
+Line 11, char 20    , STRING              , "second string"     , No Value            
+Line 15, char 2     , IF                  , if                  , No Value            
+Line 15, char 5     , ID                  , id                  , No Value            
+Line 15, char 8     , EQUAL               , =                   , No Value            
+Line 15, char 10    , ID                  , this                , No Value            
+Line 15, char 15    , THEN                , then                , No Value            
+Line 15, char 20    , ID                  , next                , No Value            
+Line 15, char 25    , END                 , end                 , No Value            
+Line 16, char 2     , IF                  , if                  , No Value            
+Line 16, char 5     , ID                  , id                  , No Value            
+Line 16, char 8     , EQUAL               , =                   , No Value            
+Line 16, char 10    , ID                  , this                , No Value            
+Line 16, char 15    , ID                  , one                 , No Value            
+Line 16, char 19    , THEN                , then                , No Value            
+Line 16, char 24    , ID                  , several             , No Value            
+Line 16, char 32    , IF                  , if                  , No Value            
+Line 16, char 35    , ID                  , words               , No Value            
+Line 16, char 41    , END                 , end                 , No Value            
+Line 17, char 2     , IF                  , if                  , No Value            
+Line 17, char 5     , ID                  , id                  , No Value            
+Line 17, char 7     , EQUAL               , =                   , No Value            
+Line 17, char 8     , ID                  , this                , No Value            
+Line 17, char 13    , ID                  , onethen             , No Value            
+Line 17, char 21    , THEN                , then                , No Value            
+Line 17, char 26    , ID                  , several             , No Value            
+Line 17, char 34    , END                 , end                 , No Value            
+Line 18, char 2     , IF                  , if                  , No Value            
+Line 18, char 5     , ID                  , ident               , No Value            
+Line 18, char 15    , EQUAL               , =                   , No Value            
+Line 18, char 16    , ID                  , thenselves          , No Value            
+Line 18, char 27    , THEN                , Then                , No Value            
+Line 18, char 32    , ID                  , two                 , No Value            
+Line 18, char 36    , END                 , end                 , No Value            
+Line 19, char 2     , IF                  , if                  , No Value            
+Line 19, char 5     , ID                  , abc                 , No Value            
+Line 19, char 9     , EQUAL               , =                   , No Value            
+Line 19, char 11    , ID                  , this                , No Value            
+Line 19, char 16    , THEN                , then                , No Value            
+Line 19, char 21    , THEN                , then                , No Value            
+Line 19, char 26    , END                 , end                 , No Value            
+Line 20, char 2     , IF                  , if                  , No Value            
+Line 20, char 5     , ID                  , abc                 , No Value            
+Line 20, char 9     , EQUAL               , =                   , No Value            
+Line 20, char 14    , CONSTINT            , 456                 , No Value            
+Line 20, char 21    , THEN                , then                , No Value            
+Line 20, char 26    , THEN                , then                , No Value            
+Line 20, char 31    , END                 , end                 , No Value            
+Line 21, char 2     , IF                  , if                  , No Value            
+Line 21, char 11    , ID                  , abc                 , No Value            
+Line 21, char 14    , EQUAL               , =                   , No Value            
+Line 21, char 15    , ID                  , thisthen            , No Value            
+Line 21, char 24    , ID                  , thennext            , No Value            
+Line 21, char 33    , THEN                , then                , No Value            
+Line 21, char 38    , THEN                , then                , No Value            
+Line 21, char 43    , THEN                , then                , No Value            
+Line 21, char 48    , END                 , end                 , No Value            
+Line 22, char 2     , IF                  , if                  , No Value            
+Line 22, char 5     , ID                  , abc                 , No Value            
+Line 22, char 14    , EQUAL               , =                   , No Value            
+Line 22, char 15    , CONSTINT            , 456                 , No Value            
+Line 22, char 19    , ID                  , orthen              , No Value            
+Line 22, char 26    , ERROR               , |                   , No Value            
+Line 22, char 27    , ID                  , abc                 , No Value            
+Line 22, char 30    , EQUAL               , =                   , No Value            
+Line 22, char 31    , ID                  , the                 , No Value            
+Line 22, char 35    , THEN                , then                , No Value            
+Line 22, char 40    , THEN                , then                , No Value            
+Line 22, char 45    , END                 , end                 , No Value            
+Line 23, char 2     , IF                  , if                  , No Value            
+Line 23, char 5     , ID                  , abc                 , No Value            
+Line 23, char 8     , EQUAL               , =                   , No Value            
+Line 23, char 12    , ID                  , t                   , No Value            
+Line 23, char 14    , ID                  , h                   , No Value            
+Line 23, char 16    , ID                  , e                   , No Value            
+Line 23, char 18    , ID                  , n                   , No Value            
+Line 23, char 24    , ERROR               , &                   , No Value            
+Line 23, char 27    , LOGICALAND          , &&                  , No Value            
+Line 23, char 31    , THEN                , then                , No Value            
+Line 23, char 36    , EQUAL               , =                   , No Value            
+Line 23, char 38    , ID                  , nextthen            , No Value            
+Line 23, char 47    , ID                  , two                 , No Value            
+Line 23, char 51    , ID                  , three               , No Value            
+Line 23, char 57    , STRING              , "then"              , No Value            
+Line 23, char 64    , THEN                , then                , No Value            
+Line 23, char 69    , THEN                , then                , No Value            
+Line 23, char 74    , THEN                , then                , No Value            
+Line 23, char 79    , END                 , end                 , No Value            
+Line 24, char 2     , IF                  , if                  , No Value            
+Line 24, char 5     , ID                  , abc                 , No Value            
+Line 24, char 9     , EQUAL               , =                   , No Value            
+Line 24, char 13    , ID                  , h                   , No Value            
+Line 24, char 18    , LOGICALOR           , ||                  , No Value            
+Line 24, char 25    , ID                  , xy                  , No Value            
+Line 24, char 30    , EQUAL               , =                   , No Value            
+Line 24, char 33    , ID                  , next                , No Value            
+Line 24, char 40    , LOGICALAND          , &&                  , No Value            
+Line 24, char 45    , ID                  , z                   , No Value            
+Line 24, char 46    , EQUAL               , =                   , No Value            
+Line 24, char 47    , CONSTINT            , 34                  , No Value            
+Line 24, char 49    , THEN                , then                , No Value            
+Line 24, char 54    , ID                  , well                , No Value            
+Line 24, char 59    , THEN                , then                , No Value            
+Line 24, char 64    , ID                  , what                , No Value            
+Line 24, char 69    , END                 , end                 , No Value            
+Line 25, char 2     , IF                  , if                  , No Value            
+Line 25, char 5     , ID                  , id                  , No Value            
+Line 25, char 7     , EQUAL               , =                   , No Value            
+Line 25, char 8     , ID                  , x                   , No Value            
+Line 25, char 9     , LOGICALOR           , ||                  , No Value            
+Line 25, char 11    , ID                  , id                  , No Value            
+Line 25, char 13    , EQUAL               , =                   , No Value            
+Line 25, char 14    , ID                  , this                , No Value            
+Line 25, char 18    , LOGICALAND          , &&                  , No Value            
+Line 25, char 20    , ID                  , id                  , No Value            
+Line 25, char 22    , EQUAL               , =                   , No Value            
+Line 25, char 23    , ID                  , two                 , No Value            
+Line 25, char 27    , ID                  , words               , No Value            
+Line 25, char 33    , THEN                , then                , No Value            
+Line 25, char 38    , ID                  , next                , No Value            
+Line 25, char 43    , ID                  , two                 , No Value            
+Line 25, char 47    , END                 , end                 , No Value            
+Line 26, char 2     , IF                  , if                  , No Value            
+Line 26, char 5     , THEN                , then                , No Value            
+Line 26, char 13    , LOGICALEQUAL        , ==                  , No Value            
+Line 26, char 17    , THEN                , then                , No Value            
+Line 26, char 22    , ID                  , next                , No Value            
+Line 26, char 27    , THEN                , then                , No Value            
+Line 26, char 32    , ID                  , well                , No Value            
+Line 26, char 37    , LOGICALEQUAL        , ==                  , No Value            
+Line 26, char 40    , ID                  , this                , No Value            
+Line 26, char 45    , ID                  , and                 , No Value            
+Line 26, char 49    , ID                  , that                , No Value            
+Line 26, char 54    , THEN                , then                , No Value            
+Line 26, char 59    , ID                  , those               , No Value            
+Line 27, char 2     , IF                  , if                  , No Value            
+Line 27, char 5     , ID                  , ident               , No Value            
+Line 27, char 15    , EQUAL               , =                   , No Value            
+Line 27, char 16    , ID                  , thenselves          , No Value            
+Line 27, char 27    , LOGICALAND          , &&                  , No Value            
+Line 27, char 30    , ID                  , this                , No Value            
+Line 27, char 35    , ERROR               , |                   , No Value            
+Line 27, char 37    , ID                  , that                , No Value            
+Line 27, char 42    , ERROR               , &                   , No Value            
+Line 27, char 44    , ID                  , now                 , No Value            
+Line 27, char 48    , THEN                , ThEn                , No Value            
+Line 27, char 53    , ID                  , two                 , No Value            
+Line 27, char 57    , END                 , end                 , No Value            
+Line 28, char 2     , IF                  , if                  , No Value            
+Line 28, char 5     , ID                  , ident               , No Value            
+Line 28, char 15    , EQUAL               , =                   , No Value            
+Line 28, char 16    , ID                  , thenselves          , No Value            
+Line 28, char 26    , ERROR               , &                   , No Value            
+Line 28, char 27    , ID                  , x3                  , No Value            
+Line 28, char 29    , EQUAL               , =                   , No Value            
+Line 28, char 30    , CONSTINT            , 123                 , No Value            
+Line 28, char 34    , ID                  , North               , No Value            
+Line 28, char 39    , LOGICALOR           , ||                  , No Value            
+Line 28, char 41    , ID                  , x4                  , No Value            
+Line 28, char 43    , EQUAL               , =                   , No Value            
+Line 28, char 44    , ID                  , North               , No Value            
+Line 28, char 50    , CONSTINT            , 123                 , No Value            
+Line 28, char 53    , LOGICALOR           , ||                  , No Value            
+Line 28, char 55    , ID                  , x3                  , No Value            
+Line 29, char 2     , EQUAL               , =                   , No Value            
+Line 30, char 2     , CONSTINT            , 123                 , No Value            
+Line 31, char 2     , ID                  , x5                  , No Value            
+Line 32, char 2     , LOGICALEQUAL        , ==                  , No Value            
+Line 33, char 2     , ID                  , them                , No Value            
+Line 33, char 7     , LOGICALOR           , ||                  , No Value            
+Line 33, char 10    , ID                  , x6                  , No Value            
+Line 34, char 2     , EQUAL               , =                   , No Value            
+Line 34, char 6     , THEN                , Then                , No Value            
+Line 34, char 11    , THEN                , then                , No Value            
+Line 34, char 16    , ID                  , thEM                , No Value            
+Line 34, char 21    , ID                  , two                 , No Value            
+Line 34, char 25    , STRING              , "end"               , No Value            
+Line 34, char 31    , END                 , end                 , No Value            
+Line 35, char 2     , IF                  , if                  , No Value            
+Line 35, char 5     , ID                  , id                  , No Value            
+Line 35, char 8     , EQUAL               , =                   , No Value            
+Line 35, char 10    , EQUAL               , =                   , No Value            
+Line 35, char 11    , ID                  , this                , No Value            
+Line 35, char 16    , EQUAL               , =                   , No Value            
+Line 35, char 17    , THEN                , then                , No Value            
+Line 35, char 21    , EQUAL               , =                   , No Value            
+Line 35, char 23    , THEN                , then                , No Value            
+Line 35, char 28    , ID                  , next                , No Value            
+Line 35, char 33    , LOGICALAND          , &&                  , No Value            
+Line 35, char 36    , END                 , end                 , No Value            
+Line 36, char 2     , END                 , end                 , No Value            
+Line 38, char 2     , IF                  , if                  , No Value            
+Line 38, char 5     , ID                  , id                  , No Value            
+Line 38, char 8     , EQUAL               , =                   , No Value            
+Line 38, char 10    , ID                  , this                , No Value            
+Line 38, char 15    , THEN                , then                , No Value            
+Line 38, char 20    , ID                  , next                , No Value            
+Line 38, char 25    , END                 , end                 , No Value            
+Line 38, char 29    , IF                  , if                  , No Value            
+Line 38, char 32    , ID                  , next                , No Value            
+Line 38, char 36    , EQUAL               , =                   , No Value            
+Line 38, char 37    , ID                  , rest                , No Value            
+Line 38, char 42    , THEN                , then                , No Value            
+Line 38, char 47    , END                 , end                 , No Value            
+Line 39, char 2     , IF                  , if                  , No Value            
+Line 39, char 5     , ID                  , id                  , No Value            
+Line 39, char 8     , LOGICALEQUAL        , ==                  , No Value            
+Line 39, char 11    , ID                  , this                , No Value            
+Line 39, char 16    , THEN                , then                , No Value            
+Line 39, char 21    , ID                  , next                , No Value            
+Line 39, char 26    , END                 , end                 , No Value            
+Line 39, char 30    , IF                  , if                  , No Value            
+Line 39, char 33    , ID                  , next                , No Value            
+Line 39, char 37    , EQUAL               , =                   , No Value            
+Line 39, char 38    , ID                  , rest                , No Value            
+Line 39, char 43    , THEN                , then                , No Value            
+Line 39, char 48    , END                 , end                 , No Value            
+Line 44, char 5     , ID                  , next                , No Value            
+Line 46, char 2     , CONSTFLT            , 12.456              , No Value            
+Line 46, char 9     , CONSTFLT            , .2345               , No Value            
+Line 46, char 16    , CONSTFLT            , 7890.               , No Value            
+Line 46, char 22    , CONSTINT            , 1                   , No Value            
+Line 46, char 24    , DOT                 , .                   , No Value            
+Line 46, char 26    , CONSTINT            , 2                   , No Value            
+Line 46, char 28    , DOT                 , .                   , No Value            
+Line 46, char 30    , CONSTINT            , 3                   , No Value            
+Line 46, char 32    , DOT                 , .                   , No Value            
+Line 46, char 33    , DOT                 , .                   , No Value            
+Line 46, char 36    , DOT                 , .                   , No Value            
+Line 46, char 37    , DOT                 , .                   , No Value            
+Line 46, char 38    , DOT                 , .                   , No Value            
+Line 46, char 39    , ID                  , e                   , No Value            
+Line 46, char 40    , DOT                 , .                   , No Value            
+Line 46, char 41    , ID                  , bccc                , No Value            
+Line 46, char 45    , DOT                 , .                   , No Value            
+Line 46, char 46    , ID                  , m                   , No Value            
+Line 46, char 47    , DOT                 , .                   , No Value            
+Line 46, char 48    , DOT                 , .                   , No Value            
+Line 46, char 49    , ID                  , e                   , No Value            
+Line 46, char 51    , DOT                 , .                   , No Value            
+Line 46, char 52    , ID                  , e                   , No Value            
+Line 46, char 54    , ID                  , a                   , No Value            
+Line 46, char 55    , DOT                 , .                   , No Value            
+Line 47, char 43    , STRING              , "string's"          , No Value            
+A regural expresion error has occured.
+Shutting down the lexer
+
+>>>type test2.txt
+123456   6634676474 9876
+
+98	789
+identifier
+a_
+A
+A_
+A___
+Aa_1234
+if
+if =
+/*  abc */
+/*  lksjdflkj 
+/*lksjdflkjds
+*/
+
+sldjflksdj
+sldfjl
+*/
+
+set abc / sdjfl + - * ^ 
+;
+set 123     ;
+
+>>>MainDriver test2.txt
+Line 1, char 1      , CONSTINT            , 123456              , No Value            
+Line 1, char 10     , CONSTINT            , 6634676474          , No Value            
+Line 1, char 21     , CONSTINT            , 9876                , No Value            
+Line 3, char 2      , CONSTINT            , 98                  , No Value            
+Line 3, char 5      , CONSTINT            , 789                 , No Value            
+Line 4, char 2      , ID                  , identifier          , No Value            
+Line 5, char 2      , ID                  , a_                  , No Value            
+Line 6, char 2      , ID                  , A                   , No Value            
+Line 7, char 2      , ID                  , A_                  , No Value            
+Line 8, char 2      , ID                  , A___                , No Value            
+Line 9, char 2      , ID                  , Aa_1234             , No Value            
+Line 10, char 2     , IF                  , if                  , No Value            
+Line 11, char 2     , IF                  , if                  , No Value            
+Line 11, char 5     , EQUAL               , =                   , No Value            
+Line 21, char 2     , SET                 , set                 , No Value            
+Line 21, char 6     , LETTERS             , abc                 , No Value            
+Line 21, char 10    , WORD                , /                   , No Value            
+Line 21, char 12    , ID                  , sdjfl               , No Value            
+Line 21, char 18    , ERROR               , +                   , No Value            
+Line 21, char 20    , ERROR               , -                   , No Value            
+Line 21, char 22    , ERROR               , *                   , No Value            
+Line 21, char 24    , ERROR               , ^                   , No Value            
+Line 22, char 2     , SEMI                , ;                   , No Value            
+Line 23, char 2     , SET                 , set                 , No Value            
+Line 23, char 6     , INT                 , 123                 , No Value            
+Line 23, char 14    , WORD                , ;                   , No Value            
+EOF
+
+>>>type test3.txt
+int
+flt
+string
+"a string: `~!@#$%^&*()_+-+1*/\][{}';asdfeqwrpom  ,. 0123456789 asdf"
+"123"
+"abc"
+",,,,,!@@##$%^&*())__-"
+123
+.001
+1003
+1.1
+1.
+.
+&&
+||
+==
+=
+&
+|
+-
+*
++
+/
+\
+[
+//This is not a comment
+/*
+	/*
+		This is not a nested block comment
+
+	*/
+This 
+is 
+not 
+a 
+block 
+comment
+*/
+
+>>>MainDriver test3.txt
+Line 1, char 1      , ID                  , int                 , No Value            
+Line 2, char 2      , ID                  , flt                 , No Value            
+Line 3, char 2      , ID                  , string              , No Value            
+Line 4, char 2      , STRING              , "a string: `~!@#$%^&*()_+-+1*/\][{}';asdfeqwrpom  ,. 0123456789 asdf", No Value            
+Line 5, char 2      , STRING              , "123"               , No Value            
+Line 6, char 2      , STRING              , "abc"               , No Value            
+Line 7, char 2      , STRING              , ",,,,,!@@##$%^&*())__-", No Value            
+Line 8, char 2      , CONSTINT            , 123                 , No Value            
+Line 9, char 2      , CONSTFLT            , .001                , No Value            
+Line 10, char 2     , CONSTINT            , 1003                , No Value            
+Line 11, char 2     , CONSTFLT            , 1.1                 , No Value            
+Line 12, char 2     , CONSTFLT            , 1.                  , No Value            
+Line 13, char 2     , DOT                 , .                   , No Value            
+Line 14, char 2     , LOGICALAND          , &&                  , No Value            
+Line 15, char 2     , LOGICALOR           , ||                  , No Value            
+Line 16, char 2     , LOGICALEQUAL        , ==                  , No Value            
+Line 17, char 2     , EQUAL               , =                   , No Value            
+Line 18, char 2     , ERROR               , &                   , No Value            
+Line 19, char 2     , ERROR               , |                   , No Value            
+Line 20, char 2     , ERROR               , -                   , No Value            
+Line 21, char 2     , ERROR               , *                   , No Value            
+Line 22, char 2     , ERROR               , +                   , No Value            
+Line 23, char 2     , ERROR               , /                   , No Value            
+Line 24, char 2     , ERROR               , \                   , No Value            
+Line 25, char 2     , ERROR               , [                   , No Value            
+EOF
+
+>>>exit
+

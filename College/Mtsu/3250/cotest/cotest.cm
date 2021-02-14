@@ -1,0 +1,66 @@
+/***********************************************************
+cotest.cm 
+Tim Beckett
+CSCI 3250-001
+ASSIGNMENT # 1
+02/24/05
+PROGRAM ID:  cotest / Concurrent Tallying by Three Processes
+REMARKS: In its current form, gives indeterminate answers.
+***********************************************************/
+int tally=0;  // Global variable to hold accumulating tally
+
+void p0()
+{
+    int n;
+
+    for (n=1; n<=60; n++)
+    {
+
+        tally = tally + 1;  /* Critical Section */
+
+    }
+    return;
+} // end p0
+
+void p1()
+{
+    int n;
+
+    for (n=1; n<=40; n++)
+    {
+
+        tally = tally - 1;  /* Critical Section */
+
+    }
+    return;
+} // end p1
+
+void p2()
+{
+    int n;
+
+    for (n=1; n<=20; n++)
+    {
+
+        tally = tally - 1;  /* Critical Section */
+
+    }
+    return;
+} // end p2
+
+int main()
+{
+
+    cout << "CSCI 3250 cotest.cm BY student name" << endl << endl;
+    cout << "Entering cobegin" << endl;
+    cobegin
+    {
+        p0();
+        p1();
+        p2();
+    }
+    cout << "Departed cobegin" << endl;
+
+    cout << "tally = " << tally << endl;
+
+} // end main

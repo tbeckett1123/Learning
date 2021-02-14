@@ -1,0 +1,217 @@
+//Name:  Chrisila Pettey
+//File:  prog3.cc
+//Date:  October 20, 2005
+//Purpose:  To utilize the handleWindow function in such a way as to make
+//			a window appear with a triangle in it then make the triangle turn
+//			right, left, inverted, or no change
+// I am indebted to Christophe Tronche who wrote the following Xlib tutorial.
+// It made learning X Window System much easier.
+// Make a window appear on the screen and draw a line inside.
+// http://tronche.lri.fr:8000/gui/x/xlib-tutorial/2nd-program-anatomy.html
+//
+
+#include <X11/Xlib.h> // Every Xlib program must include this
+#include <assert.h>   // I include this to test return values the lazy way
+#include <unistd.h>   // So we got the profile for 10 seconds
+#include <fstream>
+
+using namespace std;
+
+#define NIL (0)       // A name for the void pointer
+
+//Name:  handleWindow
+//Author:  Chrisila Pettey
+//Purpose:  This function creates a static window of size 400 X 400 in which
+//			an equilateral triangle is drawn initially pointing up.  The 
+//			triangle is redrawn each time the function is called by either
+//			rotating it left or right or inverting it from its previous
+//			position in the window.
+//Parameters:  One value parameter called direction.  If direction has a value
+//			of 0, then there is no change in the position of the triangle.
+//			A value of 1 will rotate the triangle 90 degrees clockwise.
+//			A value of 2 will rotate the triangle 180 degrees.
+//			A value of 3 will rotate the triangle 90 degrees counter clockwise.
+
+handleWindow(int direction)
+{
+	  static calltime = 1;
+	  // Open the display
+
+ 	  static Display *dpy = XOpenDisplay(NIL);
+	  if(calltime)
+		  assert(dpy);
+
+	  // Get some colors
+
+	  static int blackColor = BlackPixel(dpy, DefaultScreen(dpy));
+	  static int whiteColor = WhitePixel(dpy, DefaultScreen(dpy));
+
+	  // Create the window
+
+	  static Window w = XCreateSimpleWindow(dpy, DefaultRootWindow(dpy), 0, 0, 
+				     400, 400, 0, blackColor, blackColor);
+	  static GC gc;
+	  static XPoint points[4];
+	  int oldx, oldy;
+	  if(calltime){
+		  //set calltime to 0 so initializations are not done again
+		  calltime = 0; 
+
+		  //initialize triangle coordinates
+	  	  points[0].x = 200;
+	  	  points[0].y = 10;
+	  	  points[1].x = 10;
+	  	  points[1].y = 390;
+	  	  points[2].x = 390;
+	  	  points[2].y = 390;
+	  	  points[3].x = 200;
+	  	  points[3].y = 10;
+
+		  // We want to get MapNotify events
+		  XSelectInput(dpy, w, StructureNotifyMask);
+
+		  // "Map" the window (that is, make it appear on the screen)
+		  XMapWindow(dpy, w);
+
+		  // Create a "Graphics Context"
+		  gc = XCreateGC(dpy, w, 0, NIL);
+
+		  // Tell the GC we draw using the white color
+		  XSetForeground(dpy, gc, whiteColor);
+
+		  // Wait for the MapNotify event
+		  for(;;) {
+				XEvent e;
+				XNextEvent(dpy, &e);
+				if (e.type == MapNotify)
+						break;
+		  }
+	  	  // Create initial triangle
+
+	  	  XDrawLines(dpy, w, gc, points, 4, CoordModeOrigin);
+	  	  XFlush(dpy);
+	  }
+
+	  if(direction == 0){
+      	  // Do nothing
+      	  sleep(2);
+	  }
+	  else if(direction == 1){
+	 	   //Clear the window to prepare for new drawing
+	  	  XClearWindow(dpy, w);
+	  	  XFlush(dpy);
+
+		  //rotate coordinates right 90 degrees
+		  for(int i = 0; i < 4; i++){
+				oldx = points[i].x;
+				oldy = points[i].y;
+	  	  	    points[i].x = 400 - oldy;
+	  	  	    points[i].y = oldx;
+		  }
+		  // Draw the triangle
+		  XDrawLines(dpy, w, gc, points, 4, CoordModeOrigin);
+
+		  // Send the "DrawLine" request to the server
+		  XFlush(dpy);
+
+		  // Wait for 2 seconds
+		  sleep(2);
+	  }
+	  else if(direction == 2){
+	 	   //Clear the window to prepare for new drawing
+	  	  XClearWindow(dpy, w);
+	  	  XFlush(dpy);
+
+		  //rotate coordinates right 90 degrees
+		  for(int i = 0; i < 4; i++){
+				oldx = points[i].x;
+				oldy = points[i].y;
+	  	  	    points[i].x = 400 - oldx;
+	  	  	    points[i].y = 400 - oldy;
+		  }
+		  // Draw the triangle
+		  XDrawLines(dpy, w, gc, points, 4, CoordModeOrigin);
+
+		  // Send the "DrawLine" request to the server
+		  XFlush(dpy);
+
+		  // Wait for 2 seconds
+		  sleep(2);
+	  }
+	  else if(direction == 3){
+	  	  //Clear the window to prepare for new drawing
+	  	  XClearWindow(dpy, w);
+	  	  XFlush(dpy);
+
+		  //rotate coordinates left 90 degrees
+		  for(int i = 0; i < 4; i++){
+				oldx = points[i].x;
+				oldy = points[i].y;
+	  	  	    points[i].x = oldy;
+	  	  	    points[i].y = 400 - oldx;
+			}
+		  // Draw the triangle
+		  XDrawLines(dpy, w, gc, points, 4, CoordModeOrigin);
+
+		  // Send the "DrawLine" request to the server
+		  XFlush(dpy);
+
+		  // Wait for 2 seconds
+		  sleep(2);
+	  }
+	  else {
+		  // There is an error in the input parameter
+		  // At the moment I choose to ignore errors in input
+		  // and do nothing
+		  sleep(2);
+	  }
+}
+
+int main() //1
+{//2
+	ifstream fin;//3
+	
+	char curr; //4
+	
+	enum {//5
+	s0, /*state 0: Start State no recognized input -- do not move triangle*/ 
+	s1, /*state 1: recognized k -- do not move triangle*/
+	s2, /*state 2: recognized l -- rotate triangle 90 degrees clockwise*/ 
+	s3, /*state 3: recognized i -- invert triangle*/ 
+	s4  /*state 4: recognized j -- rotate triangle 90 degrees counter clockwise*/
+	} state = s0; // start in state 0  end of 5
+	
+	fin.open("test.dat");   // opening input file 6
+	
+	while(fin)		// 7
+	{//8
+		fin>>curr;//9
+		/*
+		handleWindow(int)
+		0 -> display triangle
+		1 -> rotate triangle 90 degrees clockwise
+		2 -> invert triangle rotate triangle 180 degrees
+		3 -> rotate triangle 90 degrees clockwise
+		invalid inputs are handled by the function
+		ex: s0 - 1 = -1 this will be handled by the function
+		*/
+		handleWindow(state - 1);					//change triangle appropreately 10
+		
+		//changing states appropreately
+		
+		(state > s1) ? state = s0 : state = state;			//once a valid expression is    11
+										//recognized return to state s0
+		
+		(state == s1 && curr == 'l') ? state = s2 : state = state;	//if expression kl go to state 2 12
+		(state == s1 && curr == 'i') ? state = s3 : state = state;	//if expression ki go to state 3 13
+		(state == s1 && curr == 'j') ? state = s4 : state = state;	//if expression kj go to state 4 14
+		(curr == 'k') ? state = s1 : state = state;			//if current input is k go to state 1 15
+		
+	}//16
+	
+	handleWindow(state - 1);//17
+	
+	fin.close();//18
+	
+	return 0;19
+} //20

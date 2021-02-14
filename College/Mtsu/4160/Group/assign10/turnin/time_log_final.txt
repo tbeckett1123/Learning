@@ -1,0 +1,111 @@
+										
+"Team Members:  Mark Rubenstein, Tim Beckett, Rodney Kincaid"										
+"Assignment#: 1 , Report # Final"										
+"Due Date:  Thursday, 9/21/2006"										
+Instructor: Dr. Al Cripps										
+										
+										
+Team assignments for this assignment.										
+Team Leader: Mark Rubenstein										
+Coder(s): Tim Beckett										
+Tester(s):  Rodney Kincaid										
+Documentor(s):  Tim Beckett										
+										
+										
+										
+Report#1 Estimated times for Assignment			Report#1 Actual times for Assignment							
+Time to design and code an alpha copy: 35 hours			Time to design and code an alpha copy: 4.75 hours							
+Time to test and debug: 14 hours			Time to test and debug: 0 hours							
+Time to Document Code: 8 hours 			Time to Document Code: 0 hours 							
+Time to produce final product for turn in: 4 hours			Time to produce final product for turn in: 0 hours							
+     Total Estimated time (in hours): 61 hours			     Total Actual time (in hours): 4.75 hours							
+										
+Report#1 Summary of Team's efforts thus far										
+"The team seems to work rather well together. Upon looking at our class, work, and life schedules we have decided"										
+"that the coder and documenter for this segment will be To,, the debugger and tester will be Rodney, and I will be the team leader."										
+We all decided that we would use e-mail as a primary form of communication and we would meet as frequently as needed.										
+We will meet in the KOM most of the time and the library is our backup meeting place.										
+Rodney e-mailed both of the other team members so we all had access to each others email address.										
+We met and gave our her our input as to where we all saw the project going so far.										
+We left with good feelings towards the group and hope that things will all work out with timing.										
+										
+Report#2 Estimated times for Assignment			Report#2 Actual times for Assignment							
+Time to design and code an alpha copy: 35 hours			Time to design and code an alpha copy: 12 hours	
+Time to test and debug: 14 hours			Time to test and debug: 1 hours	
+Time to Document Code: 8 hours 			Time to Document Code: 0 hours 	
+Time to produce final product for turn in: 4 hours			Time to produce final product for turn in: 0 hours	
+     Total Estimated time (in hours): 61 hours			     Total Actual time (in hours): 17.75 hours	
+				
+Report#2 Summary of Team's efforts thus far				
+"Not much to say here, Tim is going at it and Rodney is waiting on a alpha copy to start testing. Hopefully it will be up sometime Friday."				
+				
+Report#3 Estimated times for Assignment			Report#3 Actual times for Assignment	
+Time to design and code an alpha copy: 35 hours			Time to design and code an alpha copy: 13.5 hours	
+Time to test and debug: 14 hours			Time to test and debug: 4 hours	
+Time to Document Code: 8 hours 			Time to Document Code: 1 hours 	
+Time to produce final product for turn in: 4 hours			Time to produce final product for turn in: 0 hours	
+     Total Estimated time (in hours): 61 hours			     Total Actual time (in hours): 36.25 hours	
+				
+Report#3 Summary of Team's efforts thus far				
+"After class the group decided that we needed to re-thing our design. Tim was using a string, which Dr. Cripps mentioned would be a bad"				
+thing down the road. So off we went from square one again.				
+				
+				
+				
+Report#Final Actual times for Assignment				
+Time to design and code an alpha copy:    6.2 hours				
+Time to test and debug:    11.8 hours         				11.8
+Time to Document Code:        4 hours				4
+Time to produce final product for turn in:   5.8 hours				5.8
+     Total Estimated time (in hours):     60.45 hours				24.2
+				
+Report#Final Summary of Team's efforts thus far				
+"We had a lot of finish work down to the last hour, Rodney did a great job of finding bugs and although Tim"				
+"was about wore out, he came thru at the end. I actually erased the finished timelog and had to start over from "				
+scratch. That explains the extra time for me to complete the project. I hope our product meets the needs as		
+well as impresses you. :)		
+		
+Notes for Time Recording Log		
+Report#:		
+Assign#:		The report number related to the task being performed.
+Student Name: 		The assignment number related to the task being performed.
+Date:		 Name of the student.  Must be consistent within and from one assignment to next.
+		The date in the form month/day/year you did some activity related to the assignment such as 
+Starting Time:		"coding a routine, attending a lecture, documenting, designing, and discussing with team members."
+		The time you started the current activity today (does not refer to
+Ending Time:		" when you originally started working on a task, but when did you begin to devote additional time to it today)."
+Estimated Interruption Time:		The time you stopped the activity.
+		Any time lost due to interruptions such as those caused by phone calls (not related 
+Percent of Activity Completed?:		"to the task), chatting with people, and break time."
+Description of Activity:		Indicate whether you completed the task at hand.  Estimate the percentage of the task that was completed.
+		 A description of the task being performed.  Provide information as to what you were doing.								
+		"This is more than just ""programming/meeting"".  Tell what routine(s) and difficulties/successes."								
+										
+										
+								Percentage of 		
+Report#	Assgn#	Student Name	Date of work	Starting Time	Ending Time 	session total	Estimated Interruption Time	Activity Completed	Description of Activity	
+1	1	Mark Rubenstein	9/12/2006	21:00	22:45	1:45		90	design alpha	
+1	1	Rodney Kincaid	9/12/2006	21:00	22:30	1:30		90	design alpha	
+1	1	Tim Beckett	9/12/2006	21:00	22:30	1:30		90	design alpha	
+										
+2	1	Tim Beckett	13-Sep	19:00	21:12	2:12		20	Alpha complete Got intial project setup + Addressed Design Issues	
+2	1	Tim Beckett	14-Sep	8:00	10:50	2:50		40	Design Issues + Coding	
+2	1	Tim Beckett	14-Sep	14:10	21:30	7:20		70	Design Issues + Coding + Debugging	
+2	1	Mark Rubenstein	9/14/2006	21:00	21:15	0:15		100	timelog	
+										
+3	1	Tim Beckett	15-Sep	9:10	14:30	5:20		100	Design Issues + Coding + Debugging	
+3	1	Rodney Kincaid	17-Sep	21:00	23:00	2:00		0:00	Debugging
+3	1	Tim Beckett	18-Sep	9:00	12:00	3:00		100	Code changing for Debugger + added needed comments
+3	1	Rodney Kincaid	18-Sep	17:30	18:30	1:00			Debugging
+3	1	Rodney Kincaid	19-Sep	21:00	22:00	1:00			group consult
+3	1	Mark Rubenstein	19-Sep	21:00	22:00	1:00			group consult
+3	1	Tim Beckett	19-Sep	18:00	23:00	5:00		40	group consult and Re-Coding
+3	1	Mark Rubenstein	9/19/2006	23:00	23:15	0:15		100	timelog
+
+4	1	Tim Beckett	20-Sep	10:00	14:00	4:00		80	Re-Coding
+4	1	Rodney Kincaid	9/20/2006	16:00	17:30	1:50			
+4	1	Tim Beckett	21-Sep	17:00	19:00	2:00		100	Re-Coding
+4	1	Rodney Kincaid	9/20/2006	18:00	21:00	3:00			
+4	1	Tim Beckett	21-Sep	21:30	22:00	0:30		0:00	fixing problem
+4	1	Rodney Kincaid	21-Sep	15:00	22:00	7:00			
+4	1	Mark Rubenstein	9/21/2006	18:00	23:50	5:50		100	final timelog

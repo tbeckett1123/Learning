@@ -1,0 +1,14 @@
+B main1
+C S main1 L A
+I S main1 L A T StrId
+D
+P L A V "abc's"
+G L A V
+D
+C S main1 L B
+I S main1 L B T IntArr V 10
+D
+P L B T IntArr V 1 2 
+D
+G L B V 1
+E

@@ -1,0 +1,210 @@
+BACI System: C-- to PCODE Compiler, 09:49  14 Feb 2003
+Source file: conway.cm  Mon Feb 28 19:41:59 2005
+ line  pc
+   1    0  // conway.cm BY Tim Beckett,  CSCI 3250-001,  Due: 03 /01/01
+   2    0  // PROGRAM ID: conway.cm / Conway's Problem (C-- Version)
+   3    0  // AUTHOR: Tim Beckett
+   4    0  // INSTALLATION:  MIDDLE TENNESSEE STATE UNIVERSITY
+   5    0  
+   6    0  /*
+   7    0  This program is designed to read input that is being pipped
+   8    0  from a file. ex: bainterp conway.pco < conway.dat 
+   9    0  It has three processes that run concurrently
+  10    0  , passing data between them using shared recourses.  Semaphores 
+  11    0  are used to provide mutual exclusion amoung the process. 
+  12    0  The processes will continue running until they receave the EOD
+  13    0  which is #
+  14    0  */
+  15    0  
+  16    0  
+  17    0  // Define constants
+  18    0  const int  false = 0;
+  19    0  const int  true  = 1;
+  20    0  const char EOD = '#';
+  21    0  const int  BLOCKMAX = 10;
+  22    0  const int  LINEMAX = 24;
+  23    0  const int  RDBUFSIZE = 4;
+  24    0  const int  PRBUFSIZE = 7;
+  25    0  
+  26    0  // Global variables
+  27    0  char rdbuf[RDBUFSIZE];
+  28    0  char prbuf[PRBUFSIZE];
+  29    0  semaphore eRD, nRD, ePR, nPR;
+  30    0  
+  31    0  // ReadInput process
+  32    0  void ReadInput()
+  33    0  {
+  34    0      char input;
+  35    0  	int back, cnt;
+  36    0  	/* 
+  37    0  	input is used for relaying  chars to the rdbuf array
+  38    0  	back is used to keep track of the next element in the
+  39    0  	rdbuf array that is to be written to.
+  40    0  	*/
+  41    0  	back = cnt = 0;
+  42    5      do
+  43    5      {
+  44    5  		cin >> input;
+  45    7  	
+  46    7  		cnt++;
+  47   12  		
+  48   12  		if(cnt < BLOCKMAX)  //when cnt reaches BLOCKMAX 
+  49   16  		{					//insert a space
+  50   16  			p(eRD);
+  51   18  			rdbuf[back] = input;
+  52   23  			v(nRD);
+  53   25  		}
+  54   25  		else
+  55   26  		{
+  56   26  			p(eRD);
+  57   28  			rdbuf[back] = input;
+  58   33  			v(nRD);
+  59   35  
+  60   35  			back = (back + 1) % RDBUFSIZE;
+  61   42  
+  62   42  			p(eRD);
+  63   44  			rdbuf[back] = ' ';
+  64   49  			v(nRD);
+  65   51  
+  66   51  			cnt = 0;
+  67   54  		}
+  68   54       		
+  69   54  		back = (back + 1) % RDBUFSIZE;
+  70   61  
+  71   61      }while(input != EOD);
+  72   66  
+  73   66  } // end ReadInput
+  74   67  
+  75   67  
+  76   67  /* Squash process 
+  77   67  This process copies chars from the read buffer
+  78   67  , and puts them in to the print buffer.
+  79   67  
+  80   67  It also looks for sets of * and when encountered
+  81   67  the double * are replace with a !
+  82   67  */
+  83   67  void Squash()
+  84   67  {
+  85   67  	char buffer, sqbuffer;
+  86   67  	int rdFront, prBack;
+  87   67  
+  88   67  	/*
+  89   67  	buffer and sqbuffer are used for relaying chars from
+  90   67  	rdbuf to prbuf and compareing * with the next adjcent
+  91   67  	char 
+  92   67  	rdFront is used to keep track of the next element
+  93   67  	in the rdbuff array that is to be read from
+  94   67  	prBacke is used to keep track of the next element in
+  95   67  	the prbuff array that is to be wrritten to.
+  96   67  	*/
+  97   67  	
+  98   67  	rdFront = prBack = 0;
+  99   72  	
+ 100   72  	do
+ 101   72  	{
+ 102   72  		p(nRD);
+ 103   74  		buffer = rdbuf[rdFront];
+ 104   80  		v(eRD);
+ 105   82  		rdFront = (rdFront + 1) % RDBUFSIZE;
+ 106   89  
+ 107   89  		if(buffer == '*')
+ 108   93  		{
+ 109   93  			p(nRD);
+ 110   95  			sqbuffer = rdbuf[rdFront];
+ 111  101  			v(eRD);
+ 112  103  			rdFront = (rdFront + 1) % RDBUFSIZE;
+ 113  110  			
+ 114  110  				
+ 115  110  			if(buffer == sqbuffer)
+ 116  114  			{
+ 117  114  				p(ePR);
+ 118  116  				prbuf[prBack] = '!';
+ 119  121  				v(nPR);
+ 120  123  
+ 121  123  				prBack = (prBack + 1) % PRBUFSIZE;
+ 122  130  			}
+ 123  130  			else
+ 124  131  			{
+ 125  131  				p(ePR);
+ 126  133  				prbuf[prBack] = buffer;
+ 127  138  				v(nPR);
+ 128  140  
+ 129  140  				prBack = (prBack + 1) % PRBUFSIZE;
+ 130  147  						
+ 131  147  				p(ePR);
+ 132  149  				prbuf[prBack] = sqbuffer;
+ 133  154  				v(nPR);
+ 134  156  
+ 135  156  				prBack = (prBack + 1) % PRBUFSIZE;
+ 136  163  			}
+ 137  163  		}
+ 138  163  		else
+ 139  164  		{
+ 140  164  			p(ePR);
+ 141  166  			prbuf[prBack] = buffer;
+ 142  171  			v(nPR);
+ 143  173  
+ 144  173  			prBack = (prBack + 1) % PRBUFSIZE;
+ 145  180  		}
+ 146  180  	}while(!((buffer  == EOD) || (sqbuffer == EOD)));	     
+ 147  190  }
+ 148  191  
+ 149  191  void PrintOutput()
+ 150  191  {
+ 151  191  	/*
+ 152  191  	front is used to keep track of the next element
+ 153  191  	in the prbuff array that is to be read from
+ 154  191  	outPut is used for getting chars from prbuf and
+ 155  191  	printing them to the screen
+ 156  191  	*/
+ 157  191  	int cnt, front;
+ 158  191  	char outPut;
+ 159  191  	front = cnt = 0;
+ 160  196  	
+ 161  196  	p(nPR);
+ 162  198  	outPut = prbuf[front];
+ 163  204  	v(ePR);
+ 164  206  
+ 165  206  	front = (front + 1) % PRBUFSIZE;
+ 166  213  
+ 167  213  	while(outPut != EOD)
+ 168  217  	{
+ 169  217  		cout<<outPut; 
+ 170  219  
+ 171  219  		cnt++;
+ 172  224  
+ 173  224  		if(cnt == LINEMAX)  //when cnt reach char LINEMAX
+ 174  228  		{					//a new line is printed
+ 175  228  			cout<<endl;
+ 176  229  			cnt = 0;
+ 177  232  		}
+ 178  232  
+ 179  232  		p(nPR);
+ 180  234  		outPut = prbuf[front];
+ 181  240  		v(ePR);
+ 182  242  
+ 183  242  		front = (front + 1) % PRBUFSIZE;
+ 184  249  		
+ 185  249  	}
+ 186  250  	cout<<endl;	
+ 187  251  } // end PrintOutput
+ 188  252  
+ 189  252  
+ 190  252  int main()
+ 191  253  {
+ 192  253  	/*
+ 193  253  	The Sem's eRD and nRD are used to provide MutEx for the rdbuf array
+ 194  253  	and ePR and nPR are used on prbuf array
+ 195  253  	*/
+ 196  253  	initialsem(eRD, RDBUFSIZE);
+ 197  256   	initialsem(nRD, 0);
+ 198  259  	initialsem(ePR, PRBUFSIZE);
+ 199  262  	initialsem(nPR, 0);   
+ 200  265  
+ 201  265  	cobegin //begin concurrent processing
+ 202  266      {		//each process will continue until it receaves the EOD
+ 203  266         ReadInput();
+ 204  269         Squash();
+ 205  272         PrintOutput();
+ 206  275      }
+ 207  276  } // end main

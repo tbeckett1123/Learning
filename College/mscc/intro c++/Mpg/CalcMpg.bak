@@ -1,0 +1,46 @@
+# include <iostream.h>
+# include <stdio.h>
+# include <iomanip.h>
+
+/*
+
+
+*/
+int main()
+{
+	float gal = 0, odometer1, odometer2, miles, mpg,
+			totalGal, totalMiles, totalMpg;
+
+   cout<<"How many gallons of fuel was purchased at last fill up? (Enter -1 to end)\n";
+   cin>>gal;
+
+   while (gal != -1)
+   {
+
+   	cout<<"What was the odometer reading at your last fill up?\n";
+      cin>>odometer1;
+      cout<<"What was the odometer reading at this fill up?\n";
+      cin>>odometer2;
+
+      miles = odometer2 - odometer1;
+      mpg = miles / gal;
+      totalGal += gal;
+      totalMiles += miles;
+      totalMpg = totalMiles / totalGal;
+
+      cout<<setiosflags(ios::fixed)<<setiosflags(ios::showpoint)<<setprecision(1);
+
+      cout<<endl<<setw(10)<<"Odometer"<<setw(10)<<"Odometer"<<setw(8)<<"Fuel"
+      	 <<setw(8)<<"Miles"<<setw(8)<<"Mpg"<<setw(8)<<"Fuel"<<setw(8)<<"Miles"
+          <<setw(8)<<"Mpg\n"
+          <<setw(10)<<odometer1<<setw(10)<<odometer2<<setw(8)<<gal
+      	 <<setw(8)<<miles<<setw(8)<<mpg<<setw(8)<<totalGal<<setw(8)<<totalMiles
+          <<setw(8)<<totalMpg<<endl<<endl;
+
+
+      cout<<"How many gallons of fuel was purchased at last fill up? (Enter -1 to end)\n";
+	   cin>>gal;
+   }
+
+return 0;
+}

@@ -1,0 +1,55 @@
+/*
+Program Name:
+Programmer:	Tim Beckett
+Date:
+Language:	Borland C++
+Flowchart:	See Flowchart
+Function:
+Inputs:
+Outputs:
+Other
+	Programs
+   	 Used:
+Data
+Restrictions:
+Method:
+Printed
+	Output:
+*/
+
+/*
+  Class Name:
+  Programmer:	Tim Beckett
+        Date:
+    Language:	sun's sdk.1.4.1_01 java
+   Flowchart:	See Flowchart
+    Function:
+      Inputs:
+     Outputs:
+Other
+  Classes
+        Used:
+Data
+Restrictions:
+      Method:
+Printed
+      Output: N/A
+*/
+
+
+;Program Name:
+;Programmer:	Tim Beckett
+;Date:
+;Language:	Visiual C++
+;Flowchart:	See Flowchart
+;Function:
+;Inputs:
+;Outputs:
+;Other
+;	Programs
+;   	 Used:
+;Data
+;Restrictions:
+;Method:
+;Printed
+;	Output:

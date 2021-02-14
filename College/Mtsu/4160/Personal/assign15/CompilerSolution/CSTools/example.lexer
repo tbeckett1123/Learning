@@ -1,0 +1,80 @@
+%lexer   // Example found in assign15
+%namespace Example ;
+/* This lexer demos nested comments plus 
+commands of the form  "set  integer end"
+and "set letters end"
+It is not intended to be a cooker cutter for the assignment!!
+*/
+%define id [a-zA-Z][a-zA-Z0-9_]*
+%define ws [ \t\r\n]+
+%define digits [0-9]+
+%define strings ["]([ \t\r\n]|[!]|[#-~])*["]
+%define letters  [a-zA-Z]+
+%define dot [\.]
+%define error [^(0-9a-zA-Z"\.\t\r\n;{EOF})]
+%token INT;
+%token WORD;
+%token STRING;
+%token CONSTINT;
+%token CONSTFLT;
+%token DOT;
+%token LOGICALEQUAL;
+%token LOGICALAND;
+%token LOGICALOR;
+%token ID;
+%token ERROR;
+
+%token IDENTIFIER { public string strLexeme;
+ 			  public string Lexeme
+                    {
+				get { return strLexeme; }
+				set { strLexeme = value;}
+			   } 
+			} ;
+
+%declare{
+			public int mycount;
+   }
+U"set"			%SET {yybegin("SET");}
+{strings}		%STRING
+
+[(0-9)]+	%CONSTINT
+([(0-9)]+[\.][(0-9)]*)|([(0-9)]*[\.][(0-9)]+)	%CONSTFLT
+"="				%EQUAL
+"&&"					%LOGICALAND
+"||"					%LOGICALOR
+"=="					%LOGICALEQUAL
+{dot}					%DOT
+{ws}				;
+[/]"*"			{yybegin("COMMENT");yyl.mycount=1;}
+[/]"/"			{yybegin("LCOMMENT");}
+U"if"				%IF
+U"then"			%THEN
+U"else"			%ELSE
+U"end"			%END
+{id}				%ID
+{EOF}	{Console.Write("EOF\n");}
+{error} %ERROR
+";"				%SEMI
+<COMMENT>	[/]"*"	{yyl.mycount++;}
+<COMMENT>	"*/"		{yyl.mycount--; if (yyl.mycount == 0) yybegin("YYINITIAL");}
+<COMMENT>	{EOF}		{Console.Write("EOF in block comment\n");}
+<COMMENT>	.|\n|\r	;
+<LCOMMENT>  "\n"	{yybegin("YYINITIAL");}
+<LCOMMENT>	"\r"	{yybegin("YYINITIAL");}
+<LCOMMENT>	[/]"*"	{yybegin("COMMENT");yyl.mycount=1;}
+<LCOMMENT>  {EOF}	{Console.Write("EOF in line comment\n");}
+<LCOMMENT>	.		;
+<SET>		U"end"	%END {yybegin("YYINITIAL");}
+<SET>		{ws}		;
+<SET>		{digits}	%INT
+<SET>		{letters}	%LETTERS
+<SET>		[^ \n\r]+	{yybegin("YYINITIAL");
+					yyl.yytext=yyl.yytext.Trim();
+					try {
+						Int32.Parse(yyl.yytext);
+						return new INT();
+					}
+					catch { };
+					return new WORD();			
+				}

@@ -1,0 +1,716 @@
+Logfile was created onThu 10/19/2006 at 06:28 PM
+
+>>>type header.txt
+/*********************************************************************************************************************
+
+       	Team:            Mark Rubenstein, Tim Beckett, Rodney Kincaid
+       	PROGRAM:         Assignment 2
+       	Due DATE:        Thursday, 10/19/2006
+       	INSTRUCTOR:      Dr. Al Cripps
+ 
+
+
+Assignment 1
+Group Leader: Mark Rubenstein
+
+Estimated times (as found in the first time log report) for Assignment 1 	Actual times for Assignment 1
+Design and code an alpha copy:	35						Design and code an alpha copy:	30.25
+Test and debug:			14						Test and debug:			11.80
+Document Code:			08						Document Code:			05.00
+Produce final product:		04						Produce final product:          05.80
+Total:	 			61						Total:				52.85
+
+*********************************************************************************************************************
+
+Assignment 2
+Group Leader:  Tim Beckett
+
+Estimated times (as found in the first time log report) for Assignment 2 	Actual times for Assignment 2
+Design and code an alpha copy:	25						Design and code an alpha copy:	12:50
+Test and debug:			15						Test and debug:			08:05
+Document Code:			08						Document Code:			02:00
+Produce final product:		04						Produce final product:          00:30
+Total:	 			52						Total:				23:25
+
+*********************************************************************************************************************/
+
+>>>type source1.txt
+// there are no syntax errors in this file
+integer bob;   // this one checks your eol
+bob = 7
+class Grades                
+    integer  grade[50]
+    string  last_name[50]
+    string  first_name[50]
+    Float     average
+ 
+    def initialize   
+
+// This is the constructor for the class.
+     /* nothing */ // well
+    end
+    def integer average(integer value, float next)
+        return 23
+    end
+    def float sum
+	  float abc
+        float sumvalue;	  sumvalue = 0.0
+	  integer i
+        sumvalue = 7.2
+        for   i = 0 to 10 do
+		sumvalue = somevalue + grade[i]+Grades.grade[i]
+        end
+        return sumvalue
+    end
+    def count
+        
+        return
+    end
+    def output
+       print "this"
+ 	return
+    end
+end
+   obj = Grades.new         // Invoke the constructor
+   obj.output
+   print obj.sum
+   print obj.average
+   bob = 4    // your program should finish without errors
+>>>type source2.txt
+/*testFileAlpha written by Josh Henderlight to test Assignment20*/
+/*This file will have some syntax errors to test the lexer and parser*/
+
+
+//Some test data like Cripp's file
+class Circle
+
+	string color;
+	integer radius;
+	float circ;
+
+	def set_info(string c, integer r, float cir )
+		color = c
+		radius = r
+		circ = cir
+	end
+
+	def print_info()
+		print color
+		print radius
+		print circ
+	end
+end
+
+
+
+integer radius
+string shape
+float pi
+
+integer radius2 = 5;
+string shape = "circle";
+float area = 4.01;
+
+
+//Test for errors declaring
+float;
+integer;
+string;
+
+float float;
+integer integer;
+string string;
+
+//Test errors assigning
+
+float temp = "help"
+int test = 5.555
+string oops = 3
+>>>type source3.txt
+/*testFileGamma written by Josh Henderlight to test Assignment20*/
+
+/*This file will have some syntax errors to test the lexer and parser*/
+
+
+//valid declarations
+integer sum
+
+float price;
+
+string name
+
+
+//declarations and assignments
+float fltAverage = 45.34;
+
+string user_full_name = "John Jacob JingleHeimerSchmidt"
+
+integer sTaNDarD_DeviAtION = 1209587236;
+
+
+//invalid declarations?
+integer integer intVar
+
+float string 4.69756 "this is a bad statement"
+
+integer strInt = 90210
+
+float;
+
+string "Go Cards!";
+
+int x;
+
+
+//test case sensitivity
+iNteGER variable
+
+FLOAT account_balance
+
+sTrInG words = "words words words words";
+
+
+/*some miscellaneous code*/
+
+class employee
+
+	string name;
+	integer id_number;
+	float salary
+	integer yearly_production[12];
+
+	def set_info(string emp_name, integer emp_num, float emp_sal )
+		name = emp_name
+		id_number = emp_num
+		salary = emp_sal
+	end
+
+	def print_info()
+		print name
+		print id_number
+		print salary
+	end
+
+	def print_prod()
+		for i=1 to 12 do
+			print yearly_production[i]
+		end
+	end
+
+	def get_name()
+		return name;
+	end
+end
+>>>type template.lexer
+%lexer 
+%namespace Template ;
+
+/***********************************************************	
+************************************************************
+
+*************** Regular Expressions *****************************
+
+Give a complete description of the routine here.
+
+Routine Written By:		Rodney Kincaid
+Start Alpha Code Date:	10/10/06, 18:00
+End Alpha Code Date:	10/10/06, 20:30
+Routine Tested By:		Mark Rubenstein
+Routine Documented By:	Rodney Kincaid
+
+*************************************************************
+*************************************************************
+*/
+%define ws			[ \t]+
+%define id			[a-zA-Z_][a-zA-Z0-9_]*
+// Added Exp Notation: 10/11/06 19:00 Rodney Kincaid
+%define float		([0-9]+[.][0-9]*)|([.][0-9]+)([E]([+]|[-])[0-9]+)?
+%define string		[\"]([^\"\\\r\n]|([\\].))*[\"]
+// EOF Bug Fixing: 10/19/06 14:30 Rodney Kincaid
+%define estring		[\"]([^\"\\\r\n]|([\\].))*({EOF}|[\r\n])
+%define cont		[\\]([\r\n]|([\r][\n]))
+
+
+/***********************************************************	
+************************************************************
+
+*************** Token Definitions *****************************
+
+Give a complete description of the routine here.
+
+Routine Written By:		Rodney Kincaid
+Start Alpha Code Date:	10/10/06, 18:00
+End Alpha Code Date:	10/10/06, 20:30
+Routine Tested By:		Mark Rubenstein
+Routine Documented By:	Rodney Kincaid
+
+*************************************************************
+*************************************************************
+*/
+%token EQ;
+%token NE;
+%token LT;
+%token LE;
+%token GE;
+%token GT;
+%token MUL;
+%token PLUS;
+%token MINUS;
+%token DIV;
+%token AND;
+%token NOT;
+%token OR;
+%token INPUT;
+%token DOT;
+%token NEW;
+%token PRINT;
+%token WHILE;
+%token DO;
+%token END;
+%token THEN;
+%token RETURN;
+%token CLASS;
+%token FLOAT;
+%token INTEGER;
+%token STRING;
+%token COMMA;
+%token ELSE;
+%token ASSIGN;
+%token DEFINE;
+%token IF;
+%token FOR;
+%token TO;
+%token LParen; 
+%token RParen;
+%token LBracket;
+%token RBracket;
+%token ERROR;
+%token EOL; 
+%token IDENTIFIER{ public string strLexeme;
+				 public string Lexeme
+				 {
+				    get { return strLexeme; }
+				    set { strLexeme = value; }
+				 } 
+			   };
+%token IntConst{ public int intValue;
+				 public int Value
+				 {
+				    get { return intValue; }
+				    set { intValue = value; }
+				 } 
+			   };		   
+%token FltConst{
+				public float fltValue;
+				public float Value
+				{
+					get { return fltValue; }
+					set { fltValue = value; }
+				}
+			   };		   
+%token StrConst{
+				public string strValue;
+				public string Value
+				{
+					get { return strValue; }
+					set { strValue = value; }
+				}
+			   };
+
+
+// Lexer local variables
+// mycount: nested comment depth
+// error:   signals unterminated comment
+%declare{public int mycount;public bool error;}
+
+
+/***********************************************************	
+************************************************************
+
+*************** Lexer Rules *****************************
+
+Lexer rules for matching lexemes from the input stream and 
+returning appropriate tokens.
+
+Routine Written By:		Rodney Kincaid
+Start Alpha Code Date:	10/10/06, 18:00
+End Alpha Code Date:	10/10/06, 20:30
+Routine Tested By:		Mark Rubenstein
+Routine Documented By:	Rodney Kincaid
+
+*************************************************************
+*************************************************************
+*/
+{ws}			;
+{cont}			;
+{EOF}			%EOL		//{Console.WriteLine("EOF"); }
+[;\n\r]			%EOL		//{Console.WriteLine("EOL"); }
+"("				%LParen		//{Console.WriteLine("lparen"); }
+")"				%RParen		//{Console.WriteLine("rparen"); }
+"["				%LBracket	//{Console.WriteLine("lbracket"); }
+"]"				%RBracket	//{Console.WriteLine("rbracket"); }
+","				%COMMA		//{Console.WriteLine("comma"); }
+"="				%ASSIGN		//{Console.WriteLine("assign"); }
+"*"				%MUL		//{Console.WriteLine("mul"); }
+"+"				%PLUS		//{Console.WriteLine("plus"); }
+"-"				%MINUS		//{Console.WriteLine("minus"); }
+"/"				%DIV		//{Console.WriteLine("div"); }
+"&&"			%AND		//{Console.WriteLine("and"); }
+"!"				%NOT		//{Console.WriteLine("not"); }
+"||"			%OR			//{Console.WriteLine("or"); }
+"=="			%EQ			//{Console.WriteLine("eq"); }
+"!="			%NE			//{Console.WriteLine("ne"); }
+"<"				%LT			//{Console.WriteLine("lt"); }
+"<="			%LE			//{Console.WriteLine("le"); }
+">="			%GE			//{Console.WriteLine("ge"); }
+">"				%GT			//{Console.WriteLine("gt"); }
+"."				%DOT		//{Console.WriteLine("dot"); }
+U"def"			%DEFINE		//{Console.WriteLine("define"); }
+U"if"			%IF			//{Console.WriteLine("if"); }
+U"else"			%ELSE		//{Console.WriteLine("else"); }
+U"for"			%FOR		//{Console.WriteLine("for"); }
+U"to"			%TO			//{Console.WriteLine("to"); }
+U"integer"		%INTEGER	//{Console.WriteLine("integer"); }
+U"class"		%CLASS		//{Console.WriteLine("class"); }
+U"float"		%FLOAT		//{Console.WriteLine("float"); }
+U"string"		%STRING		//{Console.WriteLine("string"); }
+U"end"			%END		//{Console.WriteLine("end"); }
+U"return"		%RETURN		//{Console.WriteLine("return"); }
+U"while"		%WHILE		//{Console.WriteLine("while"); }
+U"do"			%DO			//{Console.WriteLine("do"); }
+U"print"		%PRINT		//{Console.WriteLine("print"); }
+U"input"		%INPUT		//{Console.WriteLine("input"); }
+[/][/].*		%EOL		//{Console.WriteLine("single line comment"); }
+[/][*]			{yybegin("COMMENT"); yyl.mycount=1; yyl.error=false; }
+[0-9]+		{ IntConst tmp = new IntConst();
+			  try  // Attempt conversion from string to int32
+			  {							 
+				tmp.Value = Int32.Parse(yytext); 
+				//Console.WriteLine("int tmp.Value is {0}",tmp.Value); 
+			  }
+			  catch 
+			  {// Failed conversion
+				return new ERROR();
+			  }
+			  return tmp;
+			}
+{float}		{ FltConst tmp = new FltConst();
+			  try // Attempt conversion from string to single
+			  {							 
+				tmp.Value = Single.Parse(yytext);
+				//Console.WriteLine("float tmp.Value is {0}",tmp.Value);
+				 
+			  }
+			  catch 
+			  {// Failed conversion
+				return new ERROR();
+			  }
+			  return tmp;
+			}
+{string}	%StrConst	{Value = yytext.Substring(1,yytext.Length-2);}
+{estring}	{yyl.UnGetChar();return new ERROR();}	// EOF Bug Fixing: 10/19/06 14:30 Rodney Kincaid
+{id}		%IDENTIFIER	{Lexeme = yytext;}						  
+.			%ERROR		{Console.WriteLine("error"); }
+
+
+/***********************************************************	
+************************************************************
+
+*************** Block Comment Handler State*****************************
+
+This state handles nested comments as well as unterminated comments. Unterminated
+comments return an error token.
+
+Routine Written By:		Rodney Kincaid
+Start Alpha Code Date:	10/10/06, 18:00
+End Alpha Code Date:	10/10/06, 20:30
+Routine Tested By:		Mark Rubenstein
+Routine Documented By:	Rodney Kincaid
+
+*************************************************************
+*************************************************************
+*/
+<COMMENT>	[/]"*"		{yyl.mycount++;}
+<COMMENT>	"*/"		{yyl.mycount--; if (yyl.mycount == 0) yybegin("YYINITIAL");}
+<COMMENT>	{EOF}		{if(yyl.error==false)	// EOF Bug Fixing: 10/19/06 14:35 Rodney Kincaid
+						 {	// Put the EOF back
+							yyl.UnGetChar();
+							yyl.error=true;
+							// Return an ERROR tolen
+							return new ERROR();
+						 }
+						 else //return EOL for matched EOF
+							return new EOL();
+						}
+<COMMENT>	.|\n|\r		{;}
+
+>>>type template.parser
+%parser template.lexer
+%namespace Template 
+
+/***********************************************************	
+************************************************************
+
+*************** identifier_type *****************************
+
+Symbol for holding the identifier type as a string.
+
+Routine Written By:		Rodney Kincaid
+Start Alpha Code Date:	10/11/06, 19:30
+End Alpha Code Date:	10/11/06, 21:05
+Routine Tested By:		Mark Rubenstein
+Routine Documented By:	Rodney Kincaid
+
+*************************************************************
+*************************************************************
+*/
+%symbol identifier_type { public string strType;	// String representation of type
+						 public string Type
+						 {
+							get { return strType; }
+							set { strType = value; }
+						 }
+						}
+
+program : statement_list   |    //{ Console.WriteLine("matched program"); };
+						;
+ 
+statement_list :  statement
+				|  statement statement_list //{ Console.WriteLine("matched statement_list"); };
+				;
+args_define : 
+		| LParen arg_list RParen	//{ Console.WriteLine("matched args_define"); }
+             ;
+
+arg_list : arg_def | arg_def COMMA arg_list  //{ Console.WriteLine("matched arg_list"); };
+					;
+					
+arg_def : variable_declare     //{ Console.WriteLine("matched arg_def"); }   
+		;
+ 
+ statement_declare : variable_declare
+				  | class_def
+				  | method_def //{ Console.WriteLine("matched statement_declare"); }
+				  ;
+
+/***********************************************************	
+************************************************************
+
+*************** variable_declare *****************************
+
+Production rule for a variable delcaration. Inserts the lexeme, scope, 
+and type into the symbol table. Does not currently implement array definitions.
+
+Routine Written By:		Rodney Kincaid
+Start Alpha Code Date:	10/11/06, 19:30
+End Alpha Code Date:	10/11/06, 21:05
+Routine Tested By:		Mark Rubenstein
+Routine Documented By:	Rodney Kincaid
+
+*************************************************************
+*************************************************************
+*/				  
+variable_declare :   identifier_type:t IDENTIFIER:id array_definition { if (!MainDriver.MainTester.symTable.Contains(null,id.Lexeme) )
+														{ 
+															   MainDriver.MainTester.symTable.Insert(null, id.Lexeme, t.Type, null);
+														}
+														else
+														{
+															Console.WriteLine("The variable has already been declared");  
+														} 
+														//Console.WriteLine("matched variable_declare"); 
+													  }
+				  ; 
+
+/***********************************************************	
+************************************************************
+
+*************** identifier_type *****************************
+
+Production rule for an identifier type. Currently only impelemented
+for the primitive types float, integer, and string. Stores the type
+in the identifier_type symbol's local variable.
+
+Routine Written By:		Rodney Kincaid
+Start Alpha Code Date:	10/11/06, 19:30
+End Alpha Code Date:	10/11/06, 21:05
+Routine Tested By:		Mark Rubenstein
+Routine Documented By:	Rodney Kincaid
+
+*************************************************************
+*************************************************************
+*/ 
+identifier_type : FLOAT:this_token  { strType = this_token.yyname; }		
+				|   INTEGER:this_token  { strType = this_token.yyname; }
+				|   STRING:this_token  { strType = this_token.yyname; }	
+				| name		/* we will NOT do this one for assignment 20 */
+				//{ Console.WriteLine("matched identifier_type"); }
+                   ;
+			
+array_definition :			
+                |  LBracket IntConst RBracket   //{ Console.WriteLine("matched array_definition"); }
+                ;
+                
+statement :  statement_declare EOL
+		  |  statement_execute EOL
+		  | identifier EOL
+		  | EOL //{ Console.WriteLine("matched statement"); }
+		  ;
+
+class_def : CLASS IDENTIFIER EOL  // You will later need code "here" to start a scope 
+					    // and to place class name in the symbol table.  But NOT
+					    // in assignment 20.
+				statement_list
+			END  //{ Console.WriteLine("matched class_def"); };
+				;
+
+method_and_type : IDENTIFIER
+			| IDENTIFIER IDENTIFIER
+			| FLOAT IDENTIFIER
+			| INTEGER IDENTIFIER
+			| STRING IDENTIFIER //{ Console.WriteLine("matched method_and_type"); }
+			;
+
+method_def : DEFINE method_and_type args_define EOL		/* we will later add code to do this..but NOT in assignment 20 */
+			    empty_possible
+			 END  //{ Console.WriteLine("matched method_define"); }
+			 ;
+
+empty_possible :
+				| statement_list //{ Console.WriteLine("matched empty_possible"); }
+				;
+statement_execute : for_stmt
+     | return_stmt
+     | if_stmt
+     | while_stmt
+     | assignment_stmt  //{ Console.WriteLine("just did assignment"); }
+     | input_stmt
+     | print_stmt
+     | block_stmt //{ Console.WriteLine("matched statement_execute"); }
+     ;
+ 
+block_stmt : DO EOL
+                    statement_list
+             END //{ Console.WriteLine("matched block_stmt"); }
+              ;
+for_stmt : FOR identifier ASSIGN simple_expression TO simple_expression block_stmt 
+			//{ Console.WriteLine("matched for_stmt"); }
+         ;
+ 
+
+return_stmt : RETURN
+            | RETURN expression //{ Console.WriteLine("matched return_stmt"); }
+            ;
+ 
+if_stmt : IF expression THEN EOL 
+               statement_list
+           else_stmt
+           END //{ Console.WriteLine("matched if_stmt"); }
+			;
+ 
+else_stmt :  
+		  | ELSE EOL
+                statement_list //{ Console.WriteLine("matched else_stmt"); }
+          ;
+ 
+while_stmt : WHILE expression block_stmt //{ Console.WriteLine("matched while_stmt"); }
+           ;
+ 
+assignment_stmt :  identifier ASSIGN expression //{ Console.WriteLine("matched assignment_stmt"); }
+		;
+name : IDENTIFIER
+		 |   name DOT IDENTIFIER //{ Console.WriteLine("matched name"); }
+		 ;
+		
+identifier : name
+			| name LBracket expression RBracket //{ Console.WriteLine("matched identifier"); }
+			;
+
+method_with_params_call :  name LParen method_param RParen
+			| name DOT NEW //{ Console.WriteLine("matched method_with_params_call"); }
+			;
+ 		
+method_param : expression
+			 | method_param COMMA expression //{ Console.WriteLine("matched method_param"); }
+               ;
+               
+input_stmt : INPUT identifier //{ Console.WriteLine("matched input_stmt"); };
+			;
+
+print_stmt : PRINT expression //{ Console.WriteLine("matched print"); }
+			;
+ 
+expression : simple_expression 
+           | simple_expression relop simple_expression //{ Console.WriteLine("matched expression"); }
+           ;
+ 
+
+simple_expression : term
+		  | PLUS term 
+		  | MINUS term
+          | simple_expression addop term //{ Console.WriteLine("matched simple expression"); }
+		  ;
+ 
+
+term : factor
+     | term mulop factor //{ Console.WriteLine("matched term"); };
+     ;
+
+factor : identifier
+       | IntConst
+       | FltConst
+       | StrConst
+       | method_with_params_call
+       | LParen expression RParen
+       | NOT factor //{ Console.WriteLine("matched factor"); }
+       ;            
+
+relop : EQ | NE | LT | LE | GE | GT //{ Console.WriteLine("matched relop"); };
+		;
+
+mulop : MUL | DIV | AND  //{ Console.WriteLine("matched mulop"); };
+		;
+ 
+
+addop : PLUS	
+      | MINUS	
+      | OR	//{ Console.WriteLine("matched addop"); }
+      ;
+>>>MainDriver source1.txt
+
+
+Key                   Scope      Lexeme     Type       Value(s)                        
+default:i             default    i          INTEGER    null
+default:value         default    value      INTEGER    null
+default:bob           default    bob        INTEGER    null
+default:abc           default    abc        FLOAT      null
+default:first_name    default    first_name STRING     null
+default:grade         default    grade      INTEGER    null
+default:average       default    average    FLOAT      null
+default:next          default    next       FLOAT      null
+default:last_name     default    last_name  STRING     null
+default:sumvalue      default    sumvalue   FLOAT      null
+
+>>>maindriver source2.txt
+Line 18, char 18: syntax error
+
+
+Key                   Scope      Lexeme     Type       Value(s)                        
+default:radius        default    radius     INTEGER    null
+default:color         default    color      STRING     null
+default:cir           default    cir        FLOAT      null
+default:r             default    r          INTEGER    null
+default:circ          default    circ       FLOAT      null
+default:c             default    c          STRING     null
+
+>>>maindriver source3.txt
+Line 15, char 19: syntax error
+
+
+Key                   Scope      Lexeme     Type       Value(s)                        
+default:name          default    name       STRING     null
+default:sum           default    sum        INTEGER    null
+default:price         default    price      FLOAT      null
+
+>>>exit
+

@@ -1,0 +1,241 @@
+%lexer 
+%namespace Template ;
+
+/***********************************************************	
+************************************************************
+
+*************** Regular Expressions *****************************
+
+Give a complete description of the routine here.
+
+Routine Written By:		Rodney Kincaid
+Start Alpha Code Date:	10/10/06, 18:00
+End Alpha Code Date:	10/10/06, 20:30
+Routine Tested By:		Mark Rubenstein
+Routine Documented By:	Rodney Kincaid
+
+*************************************************************
+*************************************************************
+*/
+%define ws			[ \t]+
+%define id			[a-zA-Z_][a-zA-Z0-9_]*
+// Added Exp Notation: 10/11/06 19:00 Rodney Kincaid
+%define float		([0-9]+[.][0-9]*)|([.][0-9]+)([E]([+]|[-])[0-9]+)?
+%define string		[\"]([^\"\\\r\n]|([\\].))*[\"]
+// EOF Bug Fixing: 10/19/06 14:30 Rodney Kincaid
+%define estring		[\"]([^\"\\\r\n]|([\\].))*({EOF}|[\r\n])
+%define cont		[\\]([\r\n]|([\r][\n]))
+
+
+/***********************************************************	
+************************************************************
+
+*************** Token Definitions *****************************
+
+Give a complete description of the routine here.
+
+Routine Written By:		Rodney Kincaid
+Start Alpha Code Date:	10/10/06, 18:00
+End Alpha Code Date:	10/10/06, 20:30
+Routine Tested By:		Mark Rubenstein
+Routine Documented By:	Rodney Kincaid
+
+*************************************************************
+*************************************************************
+*/
+%token EQ;
+%token NE;
+%token LT;
+%token LE;
+%token GE;
+%token GT;
+%token MUL;
+%token PLUS;
+%token MINUS;
+%token DIV;
+%token AND;
+%token NOT;
+%token OR;
+%token INPUT;
+%token DOT;
+%token NEW;
+%token PRINT;
+%token WHILE;
+%token DO;
+%token END;
+%token THEN;
+%token RETURN;
+%token CLASS;
+%token FLOAT;
+%token INTEGER;
+%token STRING;
+%token COMMA;
+%token ELSE;
+%token ASSIGN;
+%token DEFINE;
+%token IF;
+%token FOR;
+%token TO;
+%token LParen; 
+%token RParen;
+%token LBracket;
+%token RBracket;
+%token ERROR;
+%token EOL; 
+%token IDENTIFIER{ public string strLexeme;
+				 public string Lexeme
+				 {
+				    get { return strLexeme; }
+				    set { strLexeme = value; }
+				 } 
+			   };
+%token IntConst{ public int intValue;
+				 public int Value
+				 {
+				    get { return intValue; }
+				    set { intValue = value; }
+				 } 
+			   };		   
+%token FltConst{
+				public float fltValue;
+				public float Value
+				{
+					get { return fltValue; }
+					set { fltValue = value; }
+				}
+			   };		   
+%token StrConst{
+				public string strValue;
+				public string Value
+				{
+					get { return strValue; }
+					set { strValue = value; }
+				}
+			   };
+
+
+// Lexer local variables
+// mycount: nested comment depth
+// error:   signals unterminated comment
+%declare{public int mycount;public bool error;}
+
+
+/***********************************************************	
+************************************************************
+
+*************** Lexer Rules *****************************
+
+Lexer rules for matching lexemes from the input stream and 
+returning appropriate tokens.
+
+Routine Written By:		Rodney Kincaid
+Start Alpha Code Date:	10/10/06, 18:00
+End Alpha Code Date:	10/10/06, 20:30
+Routine Tested By:		Mark Rubenstein
+Routine Documented By:	Rodney Kincaid
+
+*************************************************************
+*************************************************************
+*/
+{ws}			;
+{cont}			;
+{EOF}			%EOL		//{Console.WriteLine("EOF"); }
+[;\n\r]			%EOL		//{Console.WriteLine("EOL"); }
+"("				%LParen		//{Console.WriteLine("lparen"); }
+")"				%RParen		//{Console.WriteLine("rparen"); }
+"["				%LBracket	//{Console.WriteLine("lbracket"); }
+"]"				%RBracket	//{Console.WriteLine("rbracket"); }
+","				%COMMA		//{Console.WriteLine("comma"); }
+"="				%ASSIGN		//{Console.WriteLine("assign"); }
+"*"				%MUL		//{Console.WriteLine("mul"); }
+"+"				%PLUS		//{Console.WriteLine("plus"); }
+"-"				%MINUS		//{Console.WriteLine("minus"); }
+"/"				%DIV		//{Console.WriteLine("div"); }
+"&&"			%AND		//{Console.WriteLine("and"); }
+"!"				%NOT		//{Console.WriteLine("not"); }
+"||"			%OR			//{Console.WriteLine("or"); }
+"=="			%EQ			//{Console.WriteLine("eq"); }
+"!="			%NE			//{Console.WriteLine("ne"); }
+"<"				%LT			//{Console.WriteLine("lt"); }
+"<="			%LE			//{Console.WriteLine("le"); }
+">="			%GE			//{Console.WriteLine("ge"); }
+">"				%GT			//{Console.WriteLine("gt"); }
+"."				%DOT		//{Console.WriteLine("dot"); }
+U"def"			%DEFINE		//{Console.WriteLine("define"); }
+U"if"			%IF			//{Console.WriteLine("if"); }
+U"else"			%ELSE		//{Console.WriteLine("else"); }
+U"for"			%FOR		//{Console.WriteLine("for"); }
+U"to"			%TO			//{Console.WriteLine("to"); }
+U"integer"		%INTEGER	//{Console.WriteLine("integer"); }
+U"class"		%CLASS		//{Console.WriteLine("class"); }
+U"float"		%FLOAT		//{Console.WriteLine("float"); }
+U"string"		%STRING		//{Console.WriteLine("string"); }
+U"end"			%END		//{Console.WriteLine("end"); }
+U"return"		%RETURN		//{Console.WriteLine("return"); }
+U"while"		%WHILE		//{Console.WriteLine("while"); }
+U"do"			%DO			//{Console.WriteLine("do"); }
+U"print"		%PRINT		//{Console.WriteLine("print"); }
+U"input"		%INPUT		//{Console.WriteLine("input"); }
+[/][/].*		%EOL		//{Console.WriteLine("single line comment"); }
+[/][*]			{yybegin("COMMENT"); yyl.mycount=1; yyl.error=false; }
+[0-9]+		{ IntConst tmp = new IntConst();
+			  try  // Attempt conversion from string to int32
+			  {							 
+				tmp.Value = Int32.Parse(yytext); 
+				//Console.WriteLine("int tmp.Value is {0}",tmp.Value); 
+			  }
+			  catch 
+			  {// Failed conversion
+				return new ERROR();
+			  }
+			  return tmp;
+			}
+{float}		{ FltConst tmp = new FltConst();
+			  try // Attempt conversion from string to single
+			  {							 
+				tmp.Value = Single.Parse(yytext);
+				//Console.WriteLine("float tmp.Value is {0}",tmp.Value);
+				 
+			  }
+			  catch 
+			  {// Failed conversion
+				return new ERROR();
+			  }
+			  return tmp;
+			}
+{string}	%StrConst	{Value = yytext.Substring(1,yytext.Length-2);}
+{estring}	{yyl.UnGetChar();return new ERROR();}	// EOF Bug Fixing: 10/19/06 14:30 Rodney Kincaid
+{id}		%IDENTIFIER	{Lexeme = yytext;}						  
+.			%ERROR		{Console.WriteLine("error"); }
+
+
+/***********************************************************	
+************************************************************
+
+*************** Block Comment Handler State*****************************
+
+This state handles nested comments as well as unterminated comments. Unterminated
+comments return an error token.
+
+Routine Written By:		Rodney Kincaid
+Start Alpha Code Date:	10/10/06, 18:00
+End Alpha Code Date:	10/10/06, 20:30
+Routine Tested By:		Mark Rubenstein
+Routine Documented By:	Rodney Kincaid
+
+*************************************************************
+*************************************************************
+*/
+<COMMENT>	[/]"*"		{yyl.mycount++;}
+<COMMENT>	"*/"		{yyl.mycount--; if (yyl.mycount == 0) yybegin("YYINITIAL");}
+<COMMENT>	{EOF}		{if(yyl.error==false)	// EOF Bug Fixing: 10/19/06 14:35 Rodney Kincaid
+						 {	// Put the EOF back
+							yyl.UnGetChar();
+							yyl.error=true;
+							// Return an ERROR tolen
+							return new ERROR();
+						 }
+						 else //return EOL for matched EOF
+							return new EOL();
+						}
+<COMMENT>	.|\n|\r		{;}

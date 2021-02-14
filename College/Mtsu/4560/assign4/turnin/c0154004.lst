@@ -1,0 +1,219 @@
+SQL> set echo on
+SQL> @"\\CS\Domain Software\Users\c0154004\My Documents\SQL Server Management Studio\Projects\Assignment_4.sql"
+SQL> --Programmer:	     Timothy Beckett
+SQL> --Assignment:	     4
+SQL> --Class:			     CSCI 4560
+SQL> --Intructor:	     Dr. Cripps
+SQL> DROP TABLE Shipment;
+
+Table dropped.
+
+SQL> DROP TABLE Supplier;
+
+Table dropped.
+
+SQL> DROP TABLE Part;
+
+Table dropped.
+
+SQL> 
+SQL> CREATE TABLE Supplier
+  2  (
+  3  	     S# 			     VARCHAR(3) NOT NULL,
+  4  	     Sname		     VARCHAR(20) NOT NULL,
+  5  	     Status		     INT DEFAULT (0)
+  6  					     CHECK (Status > -1),
+  7  	     City		     VARCHAR(15),
+  8  	     PRIMARY KEY(S#)
+  9  );
+
+Table created.
+
+SQL> 
+SQL> CREATE TABLE Part
+  2  (
+  3  	     P# 			     VARCHAR(3) NOT NULL,
+  4  	     Pname		     VARCHAR(20) NOT NULL,
+  5  	     Color		     VARCHAR(15),
+  6  	     Weight		     NUMERIC(38,1)
+  7  					     DEFAULT (1.0)
+  8  					     CHECK (Weight > 0.0),
+  9  	     City		     VARCHAR(20) NOT NULL,
+ 10  	     PRIMARY KEY(P#)
+ 11  );
+
+Table created.
+
+SQL> 
+SQL> CREATE TABLE Shipment
+  2  (
+  3  	     P# 			     VARCHAR(3) NOT NULL,
+  4  	     S# 			     VARCHAR(3) NOT NULL,
+  5  	     Qty			     INT
+  6  					     CHECK (Qty > 0),
+  7  	     Price		     NUMERIC(38,3)
+  8  					     CHECK (Price > 0.0),
+  9  	     FOREIGN KEY(P#) REFERENCES Part(P#),
+ 10  	     FOREIGN KEY(S#) REFERENCES Supplier(S#),
+ 11  	     PRIMARY KEY(P#,S#)
+ 12  );
+
+Table created.
+
+SQL> 
+SQL> -- **************** Suppliers **********************
+SQL> 
+SQL> INSERT INTO Supplier    ( s#,  Sname,  Status, City)
+  2  VALUES				     ('s1','Smith', 20,    'London');
+
+1 row created.
+
+SQL> 
+SQL> INSERT INTO Supplier    ( s#,  Sname,  Status, City)
+  2  VALUES				     ('s2','Jones', 10	,  'Paris');
+
+1 row created.
+
+SQL> 
+SQL> INSERT INTO Supplier    ( s#,  Sname,  Status, City)
+  2  VALUES				     ('s3','Blake', 30 ,   'Paris');
+
+1 row created.
+
+SQL> 
+SQL> INSERT INTO Supplier    ( s#,  Sname,  Status, City)
+  2  VALUES				     ('s4','Clark', 20 ,   'London');
+
+1 row created.
+
+SQL> 
+SQL> INSERT INTO Supplier    ( s#,  Sname,  Status)
+  2  VALUES				     ('s5','Adams', 30);
+
+1 row created.
+
+SQL> 
+SQL> -- *************** Parts ******************
+SQL> 
+SQL> INSERT INTO Part	     ( P#, Pname, Color, Weight, City)
+  2  VALUES			     ('p1',' Nut', 'Red', 12,	 'London' );
+
+1 row created.
+
+SQL> 
+SQL> INSERT INTO Part	     ( P#,  Pname,  Color,  Weight,  City)
+  2  VALUES			     ('p2','Bolt', 'Green', 17,     'Paris' );
+
+1 row created.
+
+SQL> 
+SQL> INSERT INTO Part	     ( P#,  Pname,   Weight,  City)
+  2  VALUES			     ('p3','Screw',  17,     'Rome' );
+
+1 row created.
+
+SQL> 
+SQL> INSERT INTO Part	     ( P#,  Pname,  Color, Weight,  City)
+  2  VALUES			     ('p4','Screw', 'Red', 14,	   'London' );
+
+1 row created.
+
+SQL> 
+SQL> INSERT INTO Part	     ( P#,  Pname,  Color,  Weight,  City)
+  2  VALUES			     ('p5','Cam', 'Blue',   12,     'Paris' );
+
+1 row created.
+
+SQL> 
+SQL> INSERT INTO Part	     ( P#,  Pname,  Color,  Weight,  City)
+  2  VALUES			     ('p6','Cog',  'Red',   19,     'London' );
+
+1 row created.
+
+SQL> 
+SQL> -- **************** Shipments *****************
+SQL> 
+SQL> INSERT INTO Shipment    ( S#,  P#,   Qty,	Price)
+  2  VALUES				     ('s1','p1',  300,	.005);
+
+1 row created.
+
+SQL> 
+SQL> INSERT INTO Shipment    ( S#,  P#,   Qty,	Price)
+  2  VALUES				     ('s1','p2',  200,	.009);
+
+1 row created.
+
+SQL> 
+SQL> INSERT INTO Shipment    ( S#,  P#,   Qty,	Price)
+  2  VALUES				     ('s1','p3',  400,	.004);
+
+1 row created.
+
+SQL> 
+SQL> INSERT INTO Shipment    ( S#,  P#,   Qty,	Price)
+  2  VALUES				     ('s1','p4',  200,	.009);
+
+1 row created.
+
+SQL> 
+SQL> INSERT INTO Shipment    ( S#,   P#,  Qty, Price)
+  2  VALUES				     ('s1', 'p5', 100, .01);
+
+1 row created.
+
+SQL> 
+SQL> INSERT INTO Shipment    ( S#,  P#,  Qty, Price)
+  2  VALUES				     ('s1','p6', 100, .01);
+
+1 row created.
+
+SQL> 
+SQL> INSERT INTO Shipment    ( S#,   P#,  Qty, Price)
+  2  VALUES				     ('s2', 'p1', 100, .006);
+
+1 row created.
+
+SQL> 
+SQL> INSERT INTO Shipment    ( S#,  P#,  Qty, Price)
+  2  VALUES				     ('s2','p2', 400, .004);
+
+1 row created.
+
+SQL> 
+SQL> INSERT INTO Shipment    ( S#,  P#,  Qty, Price)
+  2  VALUES				     ('s3','p2', 200, .009);
+
+1 row created.
+
+SQL> 
+SQL> INSERT INTO Shipment    ( S#,  P#,  Qty)
+  2  VALUES				     ('s3','p3', 200);
+
+1 row created.
+
+SQL> 
+SQL> INSERT INTO Shipment    ( S#,  P#,  Qty, Price)
+  2  VALUES				     ('s4','p2', 200, .008);
+
+1 row created.
+
+SQL> 
+SQL> INSERT INTO Shipment    ( S#,  P#)
+  2  VALUES				     ('s4','p3');
+
+1 row created.
+
+SQL> 
+SQL> INSERT INTO Shipment    ( S#,  P#,  Qty, Price)
+  2  VALUES				     ('s4','p4', 300, .006);
+
+1 row created.
+
+SQL> 
+SQL> INSERT INTO Shipment    ( S#,  P#,  Qty, Price)
+  2  VALUES				     ('s4','p5', 400, .003);
+
+1 row created.
+
+SQL> spool off

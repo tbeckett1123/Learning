@@ -1,0 +1,15 @@
+int main()
+{
+    int value = 0, pvalue = 0;
+    while(1)
+    {
+        pvalue = value;
+        value = analog(0);
+        if(value != pvalue)
+        {
+            printf("%d\n", value);
+        }
+    }
+    
+    return 0;
+}

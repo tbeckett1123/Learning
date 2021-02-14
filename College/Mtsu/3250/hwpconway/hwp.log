@@ -1,0 +1,385 @@
+Script started on Fri Apr 22 09:41:34 2005
+frank% gcc hwpconway.c -o conway
+frank% pr -n -t -e4 hwpconway.c
+    1   /*
+    2    * HWP/Conway BY student name, CSCI 3250-001, Due: mm/dd/yy
+    3    * PROGRAM ID:  hwpconway.c / Problem using Unix semaphores
+    4    * AUTHOR: Tim Beckett
+    5    * INSTALLATION:  MIDDLE TENNESSEE STATE UNIVERSITY
+    6    *
+    7    * REMARKS:  This program illustrates the use of shared memory segments
+    8    * and System V-style semaphores.
+    9    */
+   10   
+   11   #include <stdio.h>
+   12   #include <stdlib.h>
+   13   #include <signal.h>
+   14   #include <unistd.h>
+   15   #include <errno.h>
+   16   #include <sys/wait.h>
+   17   
+   18   #include <sys/types.h>
+   19   #include <sys/ipc.h>
+   20   #include <sys/sem.h>
+   21   #include <sys/shm.h>
+   22   
+   23   
+   24   /* --- Constants and Useful Definitions ----------------------------------- */
+   25   #define EODsentinel '#'
+   26   #define BLOCKMAX  10
+   27   #define LINEMAX   24
+   28   #define RDBUFSIZE  4
+   29   #define PRBUFSIZE  7
+   30   
+   31   #define  SUCCESS 0
+   32   #define  FAILURE 1
+   33   
+   34   /* Error message macros */
+   35   #define ERROR(msg) \
+   36     ((void)fprintf(stderr,"ERROR \"%s\": %d> %s\n", \
+   37     __FILE__,__LINE__, msg ) )
+   38   #define OS_ERROR(msg) \
+   39     ((void)fprintf(stderr,"ERROR \"%s\": %d> ", __FILE__,__LINE__),\
+   40     perror(msg) )
+   41   
+   42   
+   43   /* --- Global Variables, shared by main() and CleanupIPC() ---------------- */
+   44   int   eRD = -1;             /* Semaphore "eRD" ID (integer value)           */
+   45   int   nRD = -1;             /* Semaphore "nRD" ID (integer value)           */
+   46   int   ePR = -1;             /* Semaphore "ePR" ID (integer value)           */
+   47   int   nPR = -1;             /* Semaphore "nPR" ID (integer value)           */
+   48   
+   49   int   pidReadInput   = -1;  /* ReadInput process id                         */
+   50   int   pidSquash      = -1;  /* Squash process id                            */
+   51   int   pidPrintOutput = -1;  /* PrintOutput process id                       */
+   52   
+   53   int   shm_rdbuf = -1;       /* Shared memory buffer segment ID number       */
+   54   int   shm_prbuf = -1;       /* Shared memory buffer segment ID number       */
+   55   
+   56   
+   57   
+   58   /* --- Functions ---------------------------------------------------------- */
+   59   
+   60   void
+   61   CleanupIPC()
+   62   {
+   63       /* Remove any active semaphores and return resources to OS */
+   64       eRD != -1            ? semctl(eRD,    0, IPC_RMID, 0) : 0;
+   65       nRD != -1            ? semctl(nRD,    0, IPC_RMID, 0) : 0;
+   66       ePR != -1            ? semctl(ePR,    0, IPC_RMID, 0) : 0;
+   67       nPR != -1            ? semctl(nPR,    0, IPC_RMID, 0) : 0;
+   68   
+   69       /* Remove any active shared memory segments and return resources to OS */
+   70       shm_rdbuf != -1      ? shmctl(shm_rdbuf, IPC_RMID, 0) : 0;
+   71       shm_prbuf != -1      ? shmctl(shm_prbuf, IPC_RMID, 0) : 0;
+   72   
+   73       /* Kill all children spawned by this process */
+   74       pidReadInput   != -1 ? kill(pidReadInput,    SIGKILL) : 0;
+   75       pidSquash      != -1 ? kill(pidSquash,       SIGKILL) : 0;
+   76       pidPrintOutput != -1 ? kill(pidPrintOutput,  SIGKILL) : 0;
+   77   }
+   78   
+   79   int
+   80   InitialSem(int InitialValue)
+   81   {
+   82       int semid;
+   83       union semun
+   84       {
+   85           int              val;     /* for SETVAL */
+   86           struct semid_ds  *buf;    /* for IPC_STAT and IPC_SET */
+   87           ushort           *array;  /* FOR GETALL AND SETALL    */
+   88       } arg;
+   89   
+   90       if ( (semid = semget(IPC_PRIVATE, 1, 0600)) == -1)
+   91       {
+   92           OS_ERROR("Unable to obtain a semaphore.");
+   93           exit(FAILURE);
+   94       }
+   95       arg.val = InitialValue;
+   96       if ( semctl(semid, 0, SETVAL, arg) == -1 )
+   97       {
+   98           OS_ERROR("Unable to initialize semaphore.");
+   99           exit(FAILURE);
+  100       }
+  101       return semid;
+  102   }
+  103   
+  104   int
+  105   Pwait(int semid)
+  106   {
+  107       int retval;
+  108       struct sembuf  p_buf;
+  109   
+  110       p_buf.sem_num = 0;
+  111       p_buf.sem_op  = -1;
+  112       p_buf.sem_flg = SEM_UNDO;
+  113   
+  114       while ( ((retval = semop(semid, &p_buf, 1)) == -1) && (errno==EINTR))
+  115           ;
+  116       return retval;
+  117   }
+  118   
+  119   int
+  120   Vsignal(int semid)
+  121   {
+  122       int retval;
+  123       struct sembuf  v_buf;
+  124   
+  125       v_buf.sem_num = 0;
+  126       v_buf.sem_op  = 1;
+  127       v_buf.sem_flg = SEM_UNDO;
+  128   
+  129       while ( ((retval = semop(semid, &v_buf, 1)) == -1) && (errno==EINTR))
+  130           ;
+  131       return retval;
+  132   }
+  133   
+  134   
+  135   
+  136   
+  137   
+  138   
+  139   
+  140   /* --- Main routine ------------------------------------------------------- */
+  141   
+  142   int
+  143   main()
+  144   {
+  145       int   waitReturn;         /* PID value                                 */
+  146       int   returnStatus;       /* Return status value                       */
+  147   
+  148   
+  149       /* --- Set-up and initialize semaphores. --- */
+  150       eRD = InitialSem(RDBUFSIZE);
+  151       nRD = InitialSem(0);
+  152       ePR = InitialSem(PRBUFSIZE);
+  153       nPR = InitialSem(0);
+  154   
+  155   
+  156       /* --- Set-up shared memory. --- */
+  157       shm_rdbuf = shmget(IPC_PRIVATE, RDBUFSIZE,   0600);
+  158       shm_prbuf = shmget(IPC_PRIVATE, PRBUFSIZE,   0600);
+  159   
+  160   
+  161       /* --- Start the "ReadInput" process. --- */
+  162       if ( (pidReadInput = fork()) < 0)
+  163       {
+  164           OS_ERROR("Can't fork to run ReadInput process.");
+  165           CleanupIPC();
+  166           exit(errno);
+  167       }
+  168   
+  169       /* Fork succeeded. */
+  170       if (pidReadInput == 0)
+  171       {   /* === Child process:  Act as "ReadInput" producer. === */
+  172           char * rdbuf;          /* Buffer of characters to "Squash" */
+  173           char input;
+  174           int back, cnt;
+  175           /*
+  176           input is used for relaying  chars to the rdbuf array
+  177           back is used to keep track of the next element in the
+  178           rdbuf array that is to be written to.
+  179           */
+  180           /* Connect shared memory segment (rdbuf) to this address space. */
+  181           rdbuf = (char *) shmat(shm_rdbuf, NULL, 0);
+  182   
+  183       back = cnt = 0;
+  184   
+  185       do
+  186       {
+  187           input = getchar();
+  188           getchar();
+  189   
+  190           cnt++;
+  191   
+  192           if(cnt < BLOCKMAX)  /*when cnt reacHes BLOCKMAX*/
+  193           {                   /*insert a space*/
+  194               Pwait(eRD);
+  195               rdbuf[back] = input;
+  196               Vsignal(nRD);
+  197           }
+  198           else
+  199           {
+  200               Pwait(eRD);
+  201               rdbuf[back] = input;
+  202               Vsignal(nRD);
+  203   
+  204               back = (back + 1) % RDBUFSIZE;
+  205   
+  206               Pwait(eRD);
+  207               rdbuf[back] = ' ';
+  208               Vsignal(nRD);
+  209   
+  210               cnt = 0;
+  211           }
+  212   
+  213           back = (back + 1) % RDBUFSIZE;
+  214   
+  215       }while(input != EODsentinel);
+  216   
+  217       pause();   /* Sleep until killed. */
+  218   
+  219     }
+  220   
+  221   
+  222       /* --- Start the "Squash" process --- */
+  223       if ( (pidSquash = fork()) < 0)
+  224       {
+  225           OS_ERROR("Can't fork to run Squash process.");
+  226           CleanupIPC();
+  227           exit(errno);
+  228       }
+  229   
+  230       /* Fork succeeded. */
+  231       if (pidSquash == 0)
+  232       {   /* === Child process:  Act as "Squash" consumer/producer. === */
+  233           char * rdbuf;          /* Buffer of characters from "ReadInput" */
+  234           char * prbuf;          /* Buffer of characters to "PrintOutput" */
+  235           int    rdFront, prBack;    /* prbuf back subscript */
+  236           char   buffer, sqbuffer;
+  237   
+  238           /* Connect shared memory segment (rdbuf) to this address space. */
+  239           /*                             (connect as READ-ONLY)           */
+  240           rdbuf = (char *) shmat(shm_rdbuf, NULL, SHM_RDONLY);
+  241   
+  242           /* Connect shared memory segment (prbuf) to this address space. */
+  243           prbuf = (char *) shmat(shm_prbuf, NULL, 0);
+  244   
+  245           rdFront = prBack = 0;
+  246   
+  247           do
+  248           {
+  249               Pwait(nRD);
+  250               buffer = rdbuf[rdFront];
+  251               Vsignal(eRD);
+  252   
+  253               rdFront = (rdFront + 1) % RDBUFSIZE;
+  254   
+  255               if(buffer == '*')
+  256               {
+  257                   Pwait(nRD);
+  258                   sqbuffer = rdbuf[rdFront];
+  259                   Vsignal(eRD);
+  260   
+  261                   rdFront = (rdFront + 1) % RDBUFSIZE;
+  262   
+  263                   if(buffer == sqbuffer)
+  264                   {
+  265                       Pwait(ePR);
+  266                       prbuf[prBack] = '!';
+  267                       Vsignal(nPR);
+  268   
+  269                       prBack = (prBack + 1) % PRBUFSIZE;
+  270                   }
+  271                   else
+  272                   {
+  273                       Pwait(ePR);
+  274                       prbuf[prBack] = buffer;
+  275                       Vsignal(nPR);
+  276   
+  277                       prBack = (prBack + 1) % PRBUFSIZE;
+  278   
+  279                       Pwait(ePR);
+  280                       prbuf[prBack] = sqbuffer;
+  281                       Vsignal(nPR);
+  282   
+  283                       prBack = (prBack + 1) % PRBUFSIZE;
+  284                   }
+  285               }
+  286               else
+  287               {
+  288                   Pwait(ePR);
+  289                   prbuf[prBack] = buffer;
+  290                   Vsignal(nPR);
+  291   
+  292                   prBack = (prBack + 1) % PRBUFSIZE;
+  293               }
+  294           }while(!((buffer == EODsentinel) || (sqbuffer == EODsentinel)));
+  295   
+  296           pause();   /* Sleep until killed. */
+  297       }
+  298   
+  299   
+  300       /* --- Start the "PrintOutput" process --- */
+  301       if ( (pidPrintOutput = fork()) < 0)
+  302       {
+  303           OS_ERROR("Can't fork to run PrintOutput process.");
+  304           CleanupIPC();
+  305           exit(errno);
+  306       }
+  307   
+  308       /* Fork succeeded. */
+  309       if (pidPrintOutput == 0)
+  310       {   /* === Child process:  Act as "PrintOutput" consumer. === */
+  311   
+  312           char * prbuf;          /* Buffer of characters from "Squash" */
+  313           int cnt, front;
+  314           char outPut;
+  315   
+  316           /* Connect shared memory segment (prbuf) to this address space. */
+  317           /*                             (connect as READ-ONLY)           */
+  318           prbuf = (char *)  shmat(shm_prbuf, NULL, SHM_RDONLY);
+  319   
+  320           front = cnt = 0;
+  321   
+  322           Pwait(nPR);
+  323           outPut = prbuf[front];
+  324           Vsignal(ePR);
+  325   
+  326           front = (front + 1) % PRBUFSIZE;
+  327   
+  328           while(outPut != EODsentinel)
+  329           {
+  330               fprintf(stdout, "%c", outPut);
+  331   
+  332               cnt++;
+  333   
+  334               if(cnt == LINEMAX)
+  335               {
+  336                   fprintf(stdout, "\n");
+  337   
+  338                   cnt = 0;
+  339               }
+  340   
+  341               Pwait(nPR);
+  342               outPut = prbuf[front];
+  343               Vsignal(ePR);
+  344   
+  345               front = (front + 1) % PRBUFSIZE;
+  346   
+  347           }
+  348   
+  349           fprintf(stdout, "\n");
+  350   
+  351           exit(SUCCESS);
+  352       }
+  353   
+  354   
+  355       /* === Parent process: Wait for "PrintOutput" process to finish === */
+  356       while (pidPrintOutput != (waitReturn=wait(&returnStatus)))
+  357           if ((waitReturn==-1) && (errno!=EINTR))
+  358               break;
+  359   
+  360       /* Finalizations */
+  361       CleanupIPC();
+  362   
+  363       exit(SUCCESS);
+  364   } /* end main */
+frank% conway < $PUB/conway1.dat
+1234567890 abcdef*hi* *l
+m!*qrst u*wx!
+frank% conway < $PUB/conway1[K2.dat
+1234567890 1234567890 12
+3!67890 !!!!! !!!!! !!!!
+! !!!!! !!!!! !!!!! 1234
+567890 
+frank% conway.[K < $PUB/C[Kconway3.dat
+! 4567!0 abcdefghij !3!6
+789* *2345678! !!!!! abc
+defghij *w*x*y* *z *1234
+56789 012345~7!  !!BCDEF
+$ *
+frank% exit
+exit
+
+script done on Fri Apr 22 09:43:28 2005

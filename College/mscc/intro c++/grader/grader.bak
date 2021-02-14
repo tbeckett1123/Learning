@@ -1,0 +1,88 @@
+# include <iostream.h>
+# include <stdio.h>
+# include <conio.h>
+# include <iomanip.h>
+
+int getGrades(float*, int);
+float calc(float*, int);
+void print(int, float, float*);
+
+void main()
+	{
+	char more;
+	int count;
+   float grades[10], *grade, avrg;
+	grade = &grades[0];
+	cout<<setiosflags(ios::fixed)<<setiosflags(ios::showpoint)
+   	 <<setprecision(2);
+	do
+   	{
+      count = 0;
+   	count = getGrades(grade, count);
+   	avrg = calc(grade, count);
+		print(count, avrg, grade);
+		cout<<"would you like to calculate more grades(y/n)?";cin>>more;
+	   clrscr();
+      }
+   while (more == 'y');
+   }
+
+int getGrades(float *grade, int count)
+	{
+   cout<<"Enter up to 11 grades\n"<<"Enter a negative number to stop\n";
+   for (int get = 0; get <= 11; get++)
+   	{
+		cin>>*grade;
+
+      if (*grade<0)
+      	get = 11;
+		else
+      	{
+         *grade++;
+         count++;
+         }
+      }
+	clrscr();
+   return count;
+   }
+float theSum;
+float calc(float  *grade, int count)
+	{
+   float avrg;
+   theSum = 0;
+   for (int sum = 0; sum<count; sum++)
+   	{
+		theSum += *grade;
+      *grade++;
+      }
+	avrg = theSum / count;
+   return avrg;
+   }
+
+void print(int count, float avrg, float *grade)
+	{
+   char letter;
+	cout<<"The sum of the grades is "<<theSum<<endl
+   	 <<"The average of the grades is "<<avrg<<endl
+       <<"The grades with an * beside them are below the Average\n"
+       <<"Here are the grades\n";
+   for (int print = 0; print < count; print++)
+   	{
+      if (*grade >= 90.0)
+        	letter = 'A';
+      else if (*grade >= 80.0)
+        	letter = 'B';
+   	else if (*grade >= 70.0)
+        	letter = 'C';
+   	else if (*grade >= 60.0)
+        	letter = 'D';
+  		else
+        letter ='F';
+
+      if (*grade < avrg)
+	      cout<<"* "<<*grade<<" is a "<<letter<<endl;
+   	else
+        	cout<<"  "<<*grade<<" is a "<<letter<<endl;
+      *grade++;
+      }
+   }

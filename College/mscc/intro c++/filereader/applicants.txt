@@ -1,0 +1,18 @@
+        Name     Weight  Weight Class
+  Bartel    Mark  238     Heavyweight
+  Bartel Richard  147    Middleweight
+  Byrnes     Bob  166    Middleweight
+  Holden     Tim   95     Lightweight
+ Jackson     Jim  175    Middleweight
+ Johnson    Dave   98     Lightweight
+   Jones     Joe  256     Heavyweight
+   Leeds    Rick  148    Middleweight
+    Long   Ralph  158    Middleweight
+  Murphy    Mike  184    Middleweight
+ Nickels    Dick  210     Heavyweight
+
+Total number of lightweights is 2
+Total number of middleweights is 6
+Total number of heavyweights is 3
+
+Total number of all weight classes is 11

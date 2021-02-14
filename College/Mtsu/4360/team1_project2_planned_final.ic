@@ -1,0 +1,273 @@
+/*
+ COMMENTS
+*/
+
+#use explego.icb
+
+#define FORWARD_SPEED 100
+#define TURN_SPEED 100
+#define LEFT_MOTOR 0
+#define RIGHT_MOTOR 1
+#define TOUCH 7
+#define NUM_CANS 7
+#define RUN_TIME 60000L
+#define INIT_FREQ 200.0
+#define TONE_DURATION 1.0
+
+// define process tables
+int process_id[10];
+int process_priority[10];
+int process_enable[10];
+char process_name[10][10];
+
+// define motor output tables
+int left_motor[10];
+int right_motor[10];
+
+// global vars
+int num_processes = 0;
+int active_process = 0;
+int cans_out = 0;
+int touching = 0;
+float tone_freq = INIT_FREQ;
+
+
+//   BEGIN MAIN  /////////////////////////////////////////////////////////////
+void main()
+{
+    long start_time;
+    int pid = 0;
+    
+    while(!start_button());
+    
+    //reset_system_time(); // Simulator does not support
+    start_time = mseconds();
+    
+    process_priority[pid]= 3;
+    process_name[pid] = "StayInside";
+    process_id[pid] = start_process(StayInside(pid++));
+    
+    process_priority[pid] = 2;
+    process_name[pid] = "Touch";
+    process_id[pid] = start_process(Touch(pid++));
+    
+    process_priority[pid] = 1;
+    process_name[pid] = "Wander";
+    process_id[pid] = start_process(Wander(pid++));
+    
+    num_processes = pid;
+    process_id[pid] = start_process(prioritize());
+    
+    while(cans_out < NUM_CANS && (mseconds() - start_time < RUN_TIME))
+      defer();
+    if(cans_out >= NUM_CANS)
+      sleep(2.0);
+    ao();
+    // Cleanup processes
+    while(pid > 0)
+      {
+        kill_process(process_id[pid]);
+        num_processes--;
+        pid--;
+    }
+    
+    if(cans_out >= NUM_CANS)
+    {
+        printf("timelapsed=%d", ((int)((float)(mseconds() - start_time)/1000.0)));
+        victoryTone();
+    }
+    else
+    {
+      deathTone();
+      printf("Out of Time!");
+    }
+} //  END MAIN  //////////////////////////////////////////////////////////////
+
+
+// set process_enable entry to process's priority level
+void enable(int pid){process_enable[pid] = process_priority[pid];}
+
+// set process_enable entry to 0
+void disable(int pid){process_enable[pid] = 0;}
+
+
+void forward(int pid)
+{
+    left_motor[pid] = FORWARD_SPEED;
+    right_motor[pid] = FORWARD_SPEED;
+}
+
+void backward(int pid)
+{
+    left_motor[pid] = -FORWARD_SPEED;
+    right_motor[pid] = -FORWARD_SPEED;
+}
+
+void right(int pid)
+{
+    left_motor[pid] = TURN_SPEED;
+    right_motor[pid] = -TURN_SPEED;
+}
+
+void left(int pid)
+{
+    left_motor[pid] = -TURN_SPEED;
+    right_motor[pid] = TURN_SPEED;
+}
+
+void stop(int pid)
+{
+    left_motor[pid] = 0;
+    right_motor[pid] = 0;
+}
+
+void prioritize()
+{
+    int max, i;
+    while (1)
+      {
+        /* find process with the maximum priority */
+        max = 0;
+        for (i=0; i < num_processes; i++)
+          if (process_enable[i] > max)
+            max = process_enable[i];
+        
+        /* if no process is enabled, turn off motors */
+        if (max == 0)
+          {
+            motor(LEFT_MOTOR, 0);
+            motor(RIGHT_MOTOR, 0);
+            printf("no tasks enabled\n");
+        }
+        else
+          {
+            // get pid of active process
+            // if more than one at the highest level, get the first one
+            for (i=0; i<num_processes; i++)
+              if (process_enable[i] == max) break;
+            active_process = i;
+            
+            /* set the motors based on the commands of this process */
+            motor(LEFT_MOTOR, left_motor[active_process]);
+            motor(RIGHT_MOTOR, right_motor[active_process]);
+            printf("Running %s\n", process_name[active_process]);
+            
+        } // end else
+        
+        defer();
+        
+    } // end while
+    
+} // end prioritize
+
+// TOUCH
+void Touch(int pid)
+{
+    while (1)
+      {
+        if (digital(TOUCH))
+          {
+            cans_out++;
+            touching=1;
+            tone(tone_freq, TONE_DURATION);
+            tone_freq += 100.0;
+            
+            while(touching)defer();
+//            enable(pid);
+//            forward(pid);
+            
+            
+            
+//            msleep(2000L);
+//            disable(pid);
+        }
+        else
+          defer();
+    }
+    
+}// end TOUCH
+
+
+// WANDER
+void Wander(int pid)
+{
+    enable(pid);
+    forward(pid);
+    
+    while(1)
+      defer();
+    
+}// end WANDER
+
+
+// STAY INSIDE
+// NOTE: The knob on the handyboard is used to adjust the detection
+// of the boundary
+void StayInside(int pid)
+{
+    while(1)
+      {
+        if(lego0 >= 198)
+          {
+            enable(pid);
+            ao();            
+            backward(pid);
+            defer();
+            lego1_counts = 0;
+            while(lego1_counts < 20);
+            ao();
+            right(pid);
+            defer();
+            lego1_counts = 0;
+            while(lego1_counts < 4);
+            disable(pid);
+            touching=0;
+        }
+        else
+          defer();
+    }
+}// end STAY INSIDE
+void deathTone()
+{
+    tone(50.0,.75);
+    tone(100.0,0.35);
+    tone(50.0,0.45);
+    tone(100.0,0.25);
+    tone(50.0,0.45);
+    tone(100.0,0.25);
+    tone(50.0,0.20);
+    tone(100.0,0.15);
+    tone(50.0,0.20);
+    tone(100.0,0.15);
+    tone(50.0,0.10);
+    tone(100.0,0.05);
+    tone(50.0,0.10);
+    tone(100.0,0.05);
+    tone(50.0,0.10);
+    tone(100.0,0.05);
+    tone(50.0,0.10);
+    tone(100.0,0.05);
+    tone(50.0,0.10);
+    tone(100.0,0.05);
+    tone(50.0,0.10);
+    tone(100.0,0.05);    
+}
+
+void victoryTone()
+{
+    tone(300.0,0.10);
+    tone(350.0,0.10);
+    tone(400.0,0.10);
+    tone(300.0,0.15);
+    tone(350.0,0.15);
+    tone(400.0,0.15);
+    tone(300.0,0.25);
+    tone(350.0,0.25);
+    tone(400.0,0.25);
+    tone(300.0,0.35);
+    tone(350.0,0.35);
+    tone(400.0,0.35);
+    tone(300.0,0.45);
+    tone(350.0,0.45);
+    tone(400.0,0.45);
+}

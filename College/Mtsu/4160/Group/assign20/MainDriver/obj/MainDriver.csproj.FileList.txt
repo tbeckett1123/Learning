@@ -1,0 +1,6 @@
+obj\Debug\ResolveAssemblyReference.cache
+bin\Debug\MainDriver.exe
+bin\Debug\MainDriver.pdb
+bin\Debug\Tools.dll
+obj\Debug\MainDriver.exe
+obj\Debug\MainDriver.pdb

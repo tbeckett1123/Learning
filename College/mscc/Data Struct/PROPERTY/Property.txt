@@ -1,0 +1,19 @@
+Property:
+purchase date: 3-14-78
+hundredsVal: 60000
+article: home
+House Style: ranch
+Area: 3000
+Date Built: 4-18-62
+Property:
+purchase date: 7-2-2
+hundredsVal: 30000
+article: automobile
+Auto Style: sedan
+Color: green
+Favorite Property:
+purchase date: 7-2-2
+hundredsVal: 30000
+article: automobile
+Auto Style: sedan
+Color: green

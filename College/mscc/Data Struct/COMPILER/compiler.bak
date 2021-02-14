@@ -1,0 +1,103 @@
+/*
+Program Name:	Compiler.exe
+Programmer:		Tim Beckett
+Date:				3-7-03
+Language:		Borland C++
+Flowchart:		See Flowchart
+Function:		This program will take from file one or more math equations in
+					post fix notation and will produce the equation in assembly
+               lang.
+Inputs:			math equations(rpn) from file data.txt
+Outputs:			assembly code on screen and in a file called output.txt
+Other
+	Programs
+   	 Used:	stact class:
+       			push(stacktype) push item on to stack
+               pop() returns stacktype item and removes it from the stack
+               peek() returns stacktype item but doen't remove it from the stack
+               clear() empties the stack
+               empty() checks to see if the stack is empty
+Data
+Restrictions:	can not use the letter 'T' as a operand
+					if chacator 10 /*new line*//* is incountered it will be skipped
+					you can only push alpha chacators onto the stack
+               you may only use alpha chacators as operands
+               for every 2 operands there must be 1 operator
+               operand chacators are '/','*','+','-'
+               if any non-alpha and non-operand chacators are incountered
+               an error message will be produced but will not be written to file
+               if you don't delete output.txt compiler.exe will add to whatever
+               is already in output.txt
+               you must enter a valid equation or you will receive garbage
+               in your output
+Method:			open data.txt
+					read an equation
+               convert the equation to assembly code
+               write assembly code to screen
+               write assembly code to output.txt
+               close output.txt
+               repeat until eof for data.txt
+               close data.txt
+Printed
+	Output:		see output.txt
+*/
+
+# include "stackclass.h";
+# include <ctype.h>;
+# include <stdio.h>;
+# include <string.h>;
+int t;
+void main()
+	{
+   char chars[capacity];
+   int error = 1;
+   StackVar<char> charStack;
+   char ad(char,char), ml(char,char), sb(char,char), dv(char,char);
+   void writeFile(char[], char, int);
+	FILE *data;
+   data = fopen("DATA.txt", "r");
+   for(;!feof(data);)
+   	{
+      t = 0;
+      chars[0] = 0;//clears the char array
+		fgets(chars, capacity, data);
+   	for(int i = 0; i < strlen(chars); i++)
+   		{
+	   		if(isalpha(chars[i]))
+      			charStack.push(chars[i]);
+               /*this checks to make to see if the chacator is a new line if
+                 this condition is true then the loop is terminated*/
+      		else if(chars[i] == 10/*new line chacater*/)
+            	break;
+            else
+      			{
+         		switch(chars[i])
+         		  {
+            	  case '+': charStack.push(ad(charStack.pop(), charStack.pop()));
+            					 break;
+            	  case '*': charStack.push(ml(charStack.pop(), charStack.pop()));
+            					 break;
+            	  case '-': charStack.push(sb(charStack.pop(), charStack.pop()));
+            					 break;
+            	  case '/': charStack.push(dv(charStack.pop(), charStack.pop()));
+            					 break;
+            	  default: cout<<"RUN TIME ERROR:invalid chacater\n"
+            					   <<"select action:\n"
+                     	      <<"1)	skip chacater(continue)\n"
+                        	   <<"2)	abort operations\n";
+                            cin>>error;
+            					 switch(error)
+                     			{
+                        		case 1: break;
+                        		case 2:
+                        		default:i = strlen(chars);
+                        		};
+		           };
+               }
+      	   }
+      //if more than one equation is entered this will separate them w/ a nl
+      cout<<endl;
+      writeFile("  ",' ',t);
+      }
+   fclose(data);
+   }

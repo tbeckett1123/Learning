@@ -1,0 +1,319 @@
+Script started on Thu Feb 17 12:54:12 2005
+frank% bacc cotest.cm
+Pcode and tables are stored in cotest.pco
+Compilation listing is stored in cotest.lst
+frank% pr -n -t -e4 cotest.lst
+    1   BACI System: C-- to PCODE Compiler, 09:49  14 Feb 2003
+    2   Source file: cotest.cm  Thu Feb 17 12:49:13 2005
+    3    line  pc
+    4      1    0  /***********************************************************
+    5      2    0  cotest.cm
+    6      3    0  Tim Beckett
+    7      4    0  CSCI 3250-001
+    8      5    0  ASSIGNMENT # 1
+    9      6    0  02/24/05
+   10      7    0  PROGRAM ID:  cotest / Concurrent Tallying by Three Processes
+   11      8    0  REMARKS: In its current form, gives indeterminate answers.
+   12      9    0  ***********************************************************/
+   13     10    0  int tally=0;  // Global variable to hold accumulating tally
+   14     11    0
+   15     12    0  void p0()
+   16     13    0  {
+   17     14    0      int n;
+   18     15    0
+   19     16    0      for (n=1; n<=60; n++)
+   20     17   14      {
+   21     18   14
+   22     19   14          tally = tally + 1;  /* Critical Section */
+   23     20   19
+   24     21   19      }
+   25     22   20      return;
+   26     23   24  } // end p0
+   27     24   25
+   28     25   25  void p1()
+   29     26   25  {
+   30     27   25      int n;
+   31     28   25
+   32     29   25      for (n=1; n<=40; n++)
+   33     30   39      {
+   34     31   39
+   35     32   39          tally = tally - 1;  /* Critical Section */
+   36     33   44
+   37     34   44      }
+   38     35   45      return;
+   39     36   49  } // end p1
+   40     37   50
+   41     38   50  void p2()
+   42     39   50  {
+   43     40   50      int n;
+   44     41   50
+   45     42   50      for (n=1; n<=20; n++)
+   46     43   64      {
+   47     44   64
+   48     45   64          tally = tally - 1;  /* Critical Section */
+   49     46   69
+   50     47   69      }
+   51     48   70      return;
+   52     49   74  } // end p2
+   53     50   75
+   54     51   75  int main()
+   55     52   76  {
+   56     53   76
+   57     54   76      cout << "CSCI 3250 cotest.cm BY student name" << endl << endl;
+   58     55   79      cout << "Entering cobegin" << endl;
+   59     56   81      cobegin
+   60     57   82      {
+   61     58   82          p0();
+   62     59   85          p1();
+   63     60   88          p2();
+   64     61   91      }
+   65     62   92      cout << "Departed cobegin" << endl;
+   66     63   94
+   67     64   94      cout << "tally = " << tally << endl;
+   68     65   98
+   69     66   98  } // end main
+frank% bainterp cotest.pco
+Source file: cotest.cm  Thu Feb 17 12:49:13 2005
+Executing PCODE ...
+CSCI 3250 cotest.cm BY student name
+
+Entering cobegin
+Departed cobegin
+tally = 7
+frank% badis cotest.pco
+Disassembly stored in cotest.dco
+frank% pr -t -e4 cotest.dco
+BACI System: BenAri PCODE Disassembler, 09:49  14 Feb 2003
+PCODE file: cotest.pco  Thu Feb 17 12:54:19 2005
+
+BACI System: C-- to PCODE Compiler, 09:49  14 Feb 2003
+Source file: cotest.cm  Thu Feb 17 12:49:13 2005
+Reading from source file 'cotest.cm'
+
+      1 /***********************************************************
+      2 cotest.cm
+      3 Tim Beckett
+      4 CSCI 3250-001
+      5 ASSIGNMENT # 1
+      6 02/24/05
+      7 PROGRAM ID:  cotest / Concurrent Tallying by Three Processes
+      8 REMARKS: In its current form, gives indeterminate answers.
+      9 ***********************************************************/
+     10 int tally=0;  // Global variable to hold accumulating tally
+     11
+     12 void p0()
+     13 {
+     14     int n;
+     15
+     16     for (n=1; n<=60; n++)
+
+  lc    f    x    y     PCODE
+   0    0    1    5  LOAD_ADDR, push &n
+   1   24    0    1  PUSH_LIT 1
+   2   38    0    0  STORE, s[s[t-1]] = s[t], pop(2)
+   3    1    1    5  LOAD_VALUE, push n
+   4   24    0   60  PUSH_LIT 60
+   5   48    0    0  TEST_LE, pop(1), s[t] = (s[oldt-1] <= s[oldt])
+   6   15    0   20  JZER s[t] to 20, pop(1)
+   7   14    0   14  JUMP to 14
+   8    0    1    5  LOAD_ADDR, push &n
+   9    1    1    5  LOAD_VALUE, push n
+  10   24    0    1  PUSH_LIT 1
+  11   52    0    0  DO_ADD, pop(1), s[t] = (s[oldt-1] + s[oldt])
+  12   38    0    0  STORE, s[s[t-1]] = s[t], pop(2)
+  13   14    0    3  JUMP to 3
+
+     17     {
+     18
+     19         tally = tally + 1;  /* Critical Section */
+
+  14    0    0    0  LOAD_ADDR, push &tally
+  15    1    0    0  LOAD_VALUE, push tally
+  16   24    0    1  PUSH_LIT 1
+  17   52    0    0  DO_ADD, pop(1), s[t] = (s[oldt-1] + s[oldt])
+  18   38    0    0  STORE, s[s[t-1]] = s[t], pop(2)
+
+     20
+     21     }
+
+  19   14    0    8  JUMP to 8
+
+     22     return;
+
+  20   32    0    0  EXIT_PROC
+  21   24    0    0  PUSH_LIT 0
+  22   38    0    0  STORE, s[s[t-1]] = s[t], pop(2)
+  23   14    0    0  JUMP to 0
+
+     23 } // end p0
+
+  24   32    0    0  EXIT_PROC
+
+     24
+     25 void p1()
+     26 {
+     27     int n;
+     28
+     29     for (n=1; n<=40; n++)
+
+  25    0    1    5  LOAD_ADDR, push &n
+  26   24    0    1  PUSH_LIT 1
+  27   38    0    0  STORE, s[s[t-1]] = s[t], pop(2)
+  28    1    1    5  LOAD_VALUE, push n
+  29   24    0   40  PUSH_LIT 40
+  30   48    0    0  TEST_LE, pop(1), s[t] = (s[oldt-1] <= s[oldt])
+  31   15    0   45  JZER s[t] to 45, pop(1)
+  32   14    0   39  JUMP to 39
+  33    0    1    5  LOAD_ADDR, push &n
+  34    1    1    5  LOAD_VALUE, push n
+  35   24    0    1  PUSH_LIT 1
+  36   52    0    0  DO_ADD, pop(1), s[t] = (s[oldt-1] + s[oldt])
+  37   38    0    0  STORE, s[s[t-1]] = s[t], pop(2)
+  38   14    0   28  JUMP to 28
+
+     30     {
+     31
+     32         tally = tally - 1;  /* Critical Section */
+
+  39    0    0    0  LOAD_ADDR, push &tally
+  40    1    0    0  LOAD_VALUE, push tally
+  41   24    0    1  PUSH_LIT 1
+  42   53    0    0  DO_SUB, pop(1), s[t] = (s[oldt-1] - s[oldt])
+  43   38    0    0  STORE, s[s[t-1]] = s[t], pop(2)
+
+     33
+     34     }
+
+  44   14    0   33  JUMP to 33
+
+     35     return;
+
+  45   32    0    0  EXIT_PROC
+  46   24    0    0  PUSH_LIT 0
+  47   38    0    0  STORE, s[s[t-1]] = s[t], pop(2)
+  48   14    0    0  JUMP to 0
+
+     36 } // end p1
+
+  49   32    0    0  EXIT_PROC
+
+     37
+     38 void p2()
+     39 {
+     40     int n;
+     41
+     42     for (n=1; n<=20; n++)
+
+  50    0    1    5  LOAD_ADDR, push &n
+  51   24    0    1  PUSH_LIT 1
+  52   38    0    0  STORE, s[s[t-1]] = s[t], pop(2)
+  53    1    1    5  LOAD_VALUE, push n
+  54   24    0   20  PUSH_LIT 20
+  55   48    0    0  TEST_LE, pop(1), s[t] = (s[oldt-1] <= s[oldt])
+  56   15    0   70  JZER s[t] to 70, pop(1)
+  57   14    0   64  JUMP to 64
+  58    0    1    5  LOAD_ADDR, push &n
+  59    1    1    5  LOAD_VALUE, push n
+  60   24    0    1  PUSH_LIT 1
+  61   52    0    0  DO_ADD, pop(1), s[t] = (s[oldt-1] + s[oldt])
+  62   38    0    0  STORE, s[s[t-1]] = s[t], pop(2)
+  63   14    0   53  JUMP to 53
+
+     43     {
+     44
+     45         tally = tally - 1;  /* Critical Section */
+
+  64    0    0    0  LOAD_ADDR, push &tally
+  65    1    0    0  LOAD_VALUE, push tally
+  66   24    0    1  PUSH_LIT 1
+  67   53    0    0  DO_SUB, pop(1), s[t] = (s[oldt-1] - s[oldt])
+  68   38    0    0  STORE, s[s[t-1]] = s[t], pop(2)
+
+     46
+     47     }
+
+  69   14    0   58  JUMP to 58
+
+     48     return;
+
+  70   32    0    0  EXIT_PROC
+  71   24    0    0  PUSH_LIT 0
+  72   38    0    0  STORE, s[s[t-1]] = s[t], pop(2)
+  73   14    0    0  JUMP to 0
+
+     49 } // end p2
+
+  74   32    0    0  EXIT_PROC
+
+     50
+     51 int main()
+
+  75   80    0   99  SHORTCALL to 99, shortcall_reg = pc, pc = 99
+
+     52 {
+     53
+     54     cout << "CSCI 3250 cotest.cm BY student name" << endl << endl;
+
+  76   28    0    0  WRITE_RAWSTRING stab[0] to stdout
+  77   63    0    0  WRITELN
+  78   63    0    0  WRITELN
+
+     55     cout << "Entering cobegin" << endl;
+
+  79   28    0   36  WRITE_RAWSTRING stab[36] to stdout
+  80   63    0    0  WRITELN
+
+     56     cobegin
+
+  81    4    0    0  COBEGIN
+
+     57     {
+     58         p0();
+
+  82   18    0    3  MARKSTACK p0
+  83   19    0    4  CALL, psize-1 = 4
+  84    3    0    1  UPDATE_DISPLAY from level 1 out to level 0
+
+     59         p1();
+
+  85   18    0    5  MARKSTACK p1
+  86   19    0    4  CALL, psize-1 = 4
+  87    3    0    1  UPDATE_DISPLAY from level 1 out to level 0
+
+     60         p2();
+
+  88   18    0    7  MARKSTACK p2
+  89   19    0    4  CALL, psize-1 = 4
+  90    3    0    1  UPDATE_DISPLAY from level 1 out to level 0
+
+     61     }
+
+  91    5    0    0  COEND
+
+     62     cout << "Departed cobegin" << endl;
+
+  92   28    0   53  WRITE_RAWSTRING stab[53] to stdout
+  93   63    0    0  WRITELN
+
+     63
+     64     cout << "tally = " << tally << endl;
+
+  94   28    0   70  WRITE_RAWSTRING stab[70] to stdout
+  95    1    0    0  LOAD_VALUE, push tally
+  96   29    0    1  WRITE (int) s[t] to stdout, pop(1)
+  97   63    0    0  WRITELN
+
+     65
+     66 } // end main
+
+  98   31    0    0  HALT
+
+++-outer-++:
+  99    0    0    0  LOAD_ADDR, push &tally
+ 100   24    0    0  PUSH_LIT 0
+ 101   38    0    0  STORE, s[s[t-1]] = s[t], pop(2)
+ 102   81    0    0  SHORTRET, pc = shortcall_reg
+frank% exit
+exit
+
+script done on Thu Feb 17 12:55:38 2005

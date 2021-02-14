@@ -1,0 +1,207 @@
+// conway.cm BY Tim Beckett,  CSCI 3250-001,  Due: 03 /01/01
+// PROGRAM ID: conway.cm / Conway's Problem (C-- Version)
+// AUTHOR: Tim Beckett
+// INSTALLATION:  MIDDLE TENNESSEE STATE UNIVERSITY
+
+/*
+This program is designed to read input that is being pipped
+from a file. ex: bainterp conway.pco < conway.dat 
+It has three processes that run concurrently
+, passing data between them using shared recourses.  Semaphores 
+are used to provide mutual exclusion amoung the process. 
+The processes will continue running until they receave the EOD
+which is #
+*/
+
+
+// Define constants
+const int  false = 0;
+const int  true  = 1;
+const char EOD = '#';
+const int  BLOCKMAX = 10;
+const int  LINEMAX = 24;
+const int  RDBUFSIZE = 4;
+const int  PRBUFSIZE = 7;
+
+// Global variables
+char rdbuf[RDBUFSIZE];
+char prbuf[PRBUFSIZE];
+semaphore eRD, nRD, ePR, nPR;
+
+// ReadInput process
+void ReadInput()
+{
+    char input;
+	int back, cnt;
+	/* 
+	input is used for relaying  chars to the rdbuf array
+	back is used to keep track of the next element in the
+	rdbuf array that is to be written to.
+	*/
+	back = cnt = 0;
+    do
+    {
+		cin >> input;
+	
+		cnt++;
+		
+		if(cnt < BLOCKMAX)  //when cnt reaches BLOCKMAX 
+		{					//insert a space
+			p(eRD);
+			rdbuf[back] = input;
+			v(nRD);
+		}
+		else
+		{
+			p(eRD);
+			rdbuf[back] = input;
+			v(nRD);
+
+			back = (back + 1) % RDBUFSIZE;
+
+			p(eRD);
+			rdbuf[back] = ' ';
+			v(nRD);
+
+			cnt = 0;
+		}
+     		
+		back = (back + 1) % RDBUFSIZE;
+
+    }while(input != EOD);
+
+} // end ReadInput
+
+
+/* Squash process 
+This process copies chars from the read buffer
+, and puts them in to the print buffer.
+
+It also looks for sets of * and when encountered
+the double * are replace with a !
+*/
+void Squash()
+{
+	char buffer, sqbuffer;
+	int rdFront, prBack;
+
+	/*
+	buffer and sqbuffer are used for relaying chars from
+	rdbuf to prbuf and compareing * with the next adjcent
+	char 
+	rdFront is used to keep track of the next element
+	in the rdbuff array that is to be read from
+	prBacke is used to keep track of the next element in
+	the prbuff array that is to be wrritten to.
+	*/
+	
+	rdFront = prBack = 0;
+	
+	do
+	{
+		p(nRD);
+		buffer = rdbuf[rdFront];
+		v(eRD);
+		rdFront = (rdFront + 1) % RDBUFSIZE;
+
+		if(buffer == '*')
+		{
+			p(nRD);
+			sqbuffer = rdbuf[rdFront];
+			v(eRD);
+			rdFront = (rdFront + 1) % RDBUFSIZE;
+			
+				
+			if(buffer == sqbuffer)
+			{
+				p(ePR);
+				prbuf[prBack] = '!';
+				v(nPR);
+
+				prBack = (prBack + 1) % PRBUFSIZE;
+			}
+			else
+			{
+				p(ePR);
+				prbuf[prBack] = buffer;
+				v(nPR);
+
+				prBack = (prBack + 1) % PRBUFSIZE;
+						
+				p(ePR);
+				prbuf[prBack] = sqbuffer;
+				v(nPR);
+
+				prBack = (prBack + 1) % PRBUFSIZE;
+			}
+		}
+		else
+		{
+			p(ePR);
+			prbuf[prBack] = buffer;
+			v(nPR);
+
+			prBack = (prBack + 1) % PRBUFSIZE;
+		}
+	}while(!((buffer  == EOD) || (sqbuffer == EOD)));	     
+}
+
+void PrintOutput()
+{
+	/*
+	front is used to keep track of the next element
+	in the prbuff array that is to be read from
+	outPut is used for getting chars from prbuf and
+	printing them to the screen
+	*/
+	int cnt, front;
+	char outPut;
+	front = cnt = 0;
+	
+	p(nPR);
+	outPut = prbuf[front];
+	v(ePR);
+
+	front = (front + 1) % PRBUFSIZE;
+
+	while(outPut != EOD)
+	{
+		cout<<outPut; 
+
+		cnt++;
+
+		if(cnt == LINEMAX)  //when cnt reach char LINEMAX
+		{					//a new line is printed
+			cout<<endl;
+			cnt = 0;
+		}
+
+		p(nPR);
+		outPut = prbuf[front];
+		v(ePR);
+
+		front = (front + 1) % PRBUFSIZE;
+		
+	}
+	cout<<endl;	
+} // end PrintOutput
+
+
+int main()
+{
+	/*
+	The Sem's eRD and nRD are used to provide MutEx for the rdbuf array
+	and ePR and nPR are used on prbuf array
+	*/
+	initialsem(eRD, RDBUFSIZE);
+ 	initialsem(nRD, 0);
+	initialsem(ePR, PRBUFSIZE);
+	initialsem(nPR, 0);   
+
+	cobegin //begin concurrent processing
+    {		//each process will continue until it receaves the EOD
+       ReadInput();
+       Squash();
+       PrintOutput();
+    }
+} // end main

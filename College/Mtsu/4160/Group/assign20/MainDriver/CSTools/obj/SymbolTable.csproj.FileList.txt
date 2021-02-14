@@ -1,0 +1,5 @@
+bin\Debug\SymbolTable.dll
+bin\Debug\SymbolTable.pdb
+obj\Debug\ResolveAssemblyReference.cache
+obj\Debug\SymbolTable.dll
+obj\Debug\SymbolTable.pdb

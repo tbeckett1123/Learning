@@ -1,0 +1,156 @@
+# include "intbst.h";
+
+Btree::Btree()
+	{
+   home = NULL;
+   }
+
+Btree::~Btree()
+	{
+   clear();
+   }
+// * this function searches the btree to find a value                   *
+// * if it finds the value it returns true other wise it returns false  *
+// *  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+bool Btree::search(treeType temp)
+	{
+   locPtr = parent = home;
+   bool found = false;
+
+   for(;!found && locPtr != NULL;)
+   	{
+      if(temp < locPtr->data)
+      	{
+      	parent = locPtr;
+      	locPtr = locPtr->left;
+         }
+      else if(temp > locPtr->data)
+      	{
+      	parent = locPtr;
+      	locPtr = locPtr->right;
+         }
+      else found = true;
+      }
+   return found;
+   }
+// * this function calls the search function and then creates a new leaf *
+// * then it adds the leaf to the btree                                  *
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+void Btree::insert(treeType temp)
+	{
+   if(search(temp))
+   	cout<<"the data "<<temp<<" is already in the tree\n";
+   else
+   	{
+      locPtr = new leaf();
+      locPtr->data = temp;
+      locPtr->right = locPtr->left = NULL;
+      if (home == NULL)
+      	home = locPtr;
+      else if(temp < parent->data)
+      	parent->left = locPtr;
+      else
+         parent->right = locPtr;
+      }
+   }
+
+// * this function calls the search function then it shifts data in the btree  *
+// * if it has a left pointer that data is shifted to the left most node under *
+// * the right pointer if there is no right pointer then the data is shifted up*
+// * if the there is no left pointer then the data on the right pointer is     *
+// * shifted up                                                                *
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+void Btree::del(treeType temp)
+	{
+   if(search(temp))
+   	{
+       if(locPtr->left != NULL && locPtr->right != NULL)
+       	{
+         left = locPtr->right;
+         shift();
+         parent->right = locPtr->right;
+         }
+       else if(locPtr->left == NULL && locPtr->right != NULL)
+       	{
+         parent->left = locPtr->right;
+         }
+       else if(locPtr->right == NULL && locPtr->left != NULL)
+       	{
+         parent->right = locPtr->left;
+         }
+       if(locPtr == home)
+       	home = locPtr->right;
+       delete locPtr;
+      }
+   else cout<<"The data "<<temp<<" is not in the tree\n";
+   }
+// * this function shifts data from the left pointer to the left most node of  *
+// * the right pointer for the del function                                    *
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+void Btree::shift()
+	{
+   if(left->left != NULL)
+   	{
+      left = left->left;
+   	shift();
+      }
+   else left->left = locPtr->left;
+   }
+// * this function prints the data in the btree *
+// * * * * * * * * * * * * * * * * * * * * * *  *
+void Btree::traverse()
+	{
+   locPtr = home;
+	cout<<"Tree traversal:\n"
+   	 <<" Inorder:     ";
+ 	inOrder(locPtr);
+	cout<<endl
+   	 <<" Postorder:   ";
+ 	postOrder(locPtr);
+	cout<<endl;
+   }
+// * this function prints the data inorder for traverse *
+// * * * * * * * * * * * * * * * * * * * * * * * * * *  *
+void Btree::inOrder(leafPtr temp)
+	{
+   if(temp != NULL)
+   	{
+	   inOrder(temp->left);
+   	cout<<" "<<temp->data;
+      inOrder(temp->right);
+      }
+   }
+
+// * this function prints the data in postorder for traverse *
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+void Btree::postOrder(leafPtr temp)
+	{
+   if(temp != NULL)
+   	{
+   	postOrder(temp->left);
+      postOrder(temp->right);
+      cout<<" "<<temp->data;
+      }
+	}
+
+// * this function calls clr() which erases the tree *
+// * * * * * * * * * * * * * * * * * * * * * * * * * *
+void Btree::clear()
+	{
+    clr(home->left);
+    clr(home->right);
+    delete home;
+    home = NULL;
+   }
+
+void Btree::clr(leafPtr temp)
+	{
+   if(temp != NULL)
+   	{
+      clr(temp->left);
+      clr(temp->right);
+      delete temp;
+      }
+   }
+
+

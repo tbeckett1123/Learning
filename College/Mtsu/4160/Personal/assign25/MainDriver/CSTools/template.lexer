@@ -1,0 +1,74 @@
+%lexer
+%namespace Template 
+
+
+%define id [a-zA-Z][a-zA-Z0-9_]*
+%define ws [ \t\n\r]+
+%define digits [0-9]+
+%define string1 ["]([ \t\r\n]|[!]|[#-~])*["]
+%define string2 [']([ \t\r\n]|[!]|[#-&]|[(-~])*[']
+%define letters  [a-zA-Z]+
+%define EOL [\r\n]
+%define error [^(0-9a-zA-Z"\.\t\r\n;{EOF})]
+%declare{ public int mycount; }
+
+%token INTID;
+%token FLTID;
+%token WORD;
+%token STRID;
+%token INTCONST;
+%token FLTCONST;
+%token ID;
+%token ERROR;
+%token IDENTIFIER{		public string strLexeme;
+		 				public string Lexeme
+		 				{
+							get{ return strLexeme; }
+							set{ strLexeme = value;}
+						} 
+				  };
+%token name {	public string strType;
+				public string Type
+				{
+					get { return strType; }
+					set { strType = value; }
+				}
+			};
+
+
+{ws}											; 								
+B												%B		{ yybegin("FNAME"); }
+C												%C 
+D												%D 
+E												%E 
+G												%G 
+I												%I 
+L												%L		{ yybegin("FNAME"); }
+P												%P 
+S												%S		{ yybegin("FNAME"); }
+T												%T		
+V												%V 
+{string1}										%name	{ Type = yytext; }
+{string2}										%name	{ Type = yytext; }
+[a-zA-Z_][a-zA-Z0-9_]*							%name	{ Type = yytext; }
+([0-9]+[E|e]([\+]|[\-])?[0-9]+)					%name	{ Type = yytext; }
+([(0-9)]+[\.][(0-9)]*)|([(0-9)]*[\.][(0-9)]+)	%name	{ Type = yytext; }
+[0-9]+											%name	{ Type = yytext; }
+{EOL}											%EOL
+{EOF}											%EOL
+[/]"*"													{yybegin("COMMENT");yyl.mycount=1;}
+[/]"/"													{yybegin("LCOMMENT");}
+
+<COMMENT>	[/]"*"	    {yyl.mycount++;}
+<COMMENT>	"*/"		{yyl.mycount--; if (yyl.mycount == 0) yybegin("YYINITIAL");}
+<COMMENT>	{EOF}		%EOL  
+<COMMENT>	.|\n|\r		;
+
+<LCOMMENT>  [\r\n]	{yybegin("YYINITIAL");}
+<LCOMMENT>	[/]"*"	{yybegin("COMMENT");yyl.mycount=1;}
+<LCOMMENT>  {EOF}	%EOL 
+<LCOMMENT>	.		;
+
+<FNAME>		[a-zA-Z_][a-zA-Z0-9_]* %name { Type = yytext; yybegin("YYINITIAL"); }
+<FNAME>		{ws}				   ;
+
