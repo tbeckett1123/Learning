@@ -1,0 +1,7 @@
+"Angular Forms"
+"Angular: Reactive Forms"
+	* HTTP and CRUD
+"RxJS i Angular: Reactive Development"
+	* RxJS and Observables
+"Angular HTTP Communication"
+	* Intermdediate HTTP Techniques
