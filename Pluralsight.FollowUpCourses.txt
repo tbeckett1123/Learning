@@ -5,3 +5,9 @@
 	* RxJS and Observables
 "Angular HTTP Communication"
 	* Intermdediate HTTP Techniques
+"Angular Routing"
+	* Required, optional, & query parameters
+	* Prefetching wiht route resolvers
+	* Child and secondary router outlets
+	* Router guards
+	* Lazy loading
