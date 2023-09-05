@@ -1,0 +1,40 @@
+﻿@page "/employeeoverviewvirtual"
+
+<h3>Employee Overview</h3>
+
+@if (Employees == null)
+{
+<p><em>Loading...</em></p>
+}
+else
+{
+<div class="virtualized">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Employee ID</th>
+                <th>First name</th>
+                <th>Last name</th>
+            </tr>
+        </thead>
+        <tbody>
+            <Virtualize ItemsProvider="LoadEmployees" ItemSize="itemHeight">
+                <ItemContent>
+                    <tr @key="context.GetHashCode()" >
+                        <td>@context.EmployeeId</td>
+                        <td>@context.FirstName</td>
+                        <td>@context.LastName</td>
+                    </tr>
+                </ItemContent>
+                <Placeholder>
+                    <tr>
+                        <td>Loading...</td>
+                        <td>Loading...</td>
+                        <td>Loading...</td>
+                    </tr>
+                </Placeholder>
+            </Virtualize>
+        </tbody>
+    </table>
+</div>
+}

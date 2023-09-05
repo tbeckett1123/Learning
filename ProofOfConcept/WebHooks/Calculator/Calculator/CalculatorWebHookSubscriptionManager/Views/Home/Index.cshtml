@@ -1,0 +1,36 @@
+﻿@model Calculator.Core.Models.SubscriptionRequest
+@{
+    ViewBag.Title = "Calculation Web Hook Subscription Registration";
+}
+
+@using (Html.BeginForm("Register", "Home"))
+{
+    <div class="jumbotron">
+        <h1>Calculation Web Hook Subscription Registration</h1>
+    </div>
+
+    <div class="row">
+        <div class="col-md">
+            @Html.LabelFor(x => x.Name)
+            @Html.TextBoxFor(x => x.Name)
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md">
+            @Html.LabelFor(x => x.Url)
+            @Html.TextBoxFor(x => x.Url)
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md">
+            @Html.LabelFor(x => x.ExpireOn)
+            @Html.TextBoxFor(x => x.ExpireOn)
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md">
+            <button type="submit">Submit</button>
+        </div>
+    </div>
+}
+

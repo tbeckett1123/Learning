@@ -1,0 +1,357 @@
+Module 3 Snippets
+-----------------
+
+Demo 4: Edit Employee page
+--------------------------
+
+EditForm first run:
+
+<section class="employee-edit">
+	<h1 class="page-title">Details for @Employee.FirstName @Employee.LastName</h1>
+
+
+	<EditForm Model="@Employee">
+		<div class="form-group row">
+			<label for="lastName" class="col-sm-3">Last name: </label>
+			<InputText id="lastName" @bind-Value="@Employee.LastName" class="form-control col-sm-8" placeholder="Enter last name"></InputText>
+
+		</div>
+
+		<div class="form-group row">
+			<label for="firstName" class="col-sm-3">First name: </label>
+			<InputText id="firstName" class="form-control col-sm-8" @bind-Value="@Employee.FirstName" placeholder="Enter first name"></InputText>
+
+		</div>
+
+
+		<div class="form-group row">
+			<label for="birthdate" class="col-sm-3">Birthdate: </label>
+			<InputDate id="birthdate" class="form-control col-sm-8" @bind-Value="@Employee.BirthDate" placeholder="Enter birthdate"></InputDate>
+
+		</div>
+		<div class="form-group row">
+			<label for="email" class="col-sm-3">Email: </label>
+			<InputText id="email" class="form-control col-sm-8" @bind-Value="@Employee.Email" placeholder="Enter email"></InputText>
+
+		</div>
+
+		<div class="form-group row">
+			<label for="street" class="col-sm-3">Street: </label>
+			<InputText id="street" class="form-control col-sm-8" @bind-Value="@Employee.Street" placeholder="Enter street"></InputText>
+
+		</div>
+
+		<div class="form-group row">
+			<label for="zip" class="col-sm-3">Zip code: </label>
+			<InputText id="zip" class="form-control col-sm-8" @bind-Value="@Employee.Zip" placeholder="Enter zip code"></InputText>
+
+		</div>
+
+		<div class="form-group row">
+			<label for="city" class="col-sm-3">City: </label>
+			<InputText id="city" class="form-control col-sm-8" @bind-Value="@Employee.City" placeholder="Enter city"></InputText>
+
+		</div>
+	</EditForm>
+	
+
+ICountryDataService
+-------------------
+
+public interface ICountryDataService
+{
+	Task<IEnumerable<Country>> GetAllCountries();
+	Task<Country> GetCountryById(int countryId);
+}
+
+CountryDataService
+------------------
+public class CountryDataService : ICountryDataService
+{
+	private readonly HttpClient _httpClient;
+
+	public CountryDataService(HttpClient httpClient)
+	{
+		_httpClient = httpClient;
+	}
+
+	public async Task<IEnumerable<Country>> GetAllCountries()
+	{
+		return await JsonSerializer.DeserializeAsync<IEnumerable<Country>>
+			(await _httpClient.GetStreamAsync($"api/country"), new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+	}
+
+	public async Task<Country> GetCountryById(int countryId)
+	{
+		return await JsonSerializer.DeserializeAsync<Country>
+			(await _httpClient.GetStreamAsync($"api/country{countryId}"), new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+	}
+}
+
+IJobCategoryDataService
+-----------------------
+
+public interface IJobCategoryDataService
+{
+	Task<IEnumerable<JobCategory>> GetAllJobCategories();
+	Task<JobCategory> GetJobCategoryById(int jobCategoryId);
+}
+
+JobCategoryDataService
+----------------------
+
+public class JobCategoryDataService : IJobCategoryDataService
+{
+	private readonly HttpClient _httpClient;
+
+	public JobCategoryDataService(HttpClient httpClient)
+	{
+		_httpClient = httpClient;
+	}
+
+	public async Task<IEnumerable<JobCategory>> GetAllJobCategories()
+	{
+		return await JsonSerializer.DeserializeAsync<IEnumerable<JobCategory>>
+			(await _httpClient.GetStreamAsync($"api/jobcategory"), new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+	}
+
+	public async Task<JobCategory> GetJobCategoryById(int jobCategoryId)
+	{
+		return await JsonSerializer.DeserializeAsync<JobCategory>
+			(await _httpClient.GetStreamAsync($"api/jobcategory/{jobCategoryId}"), new JsonSerializerOptions() { PropertyNameCaseInsensitive = true });
+	}
+}
+
+
+EditForm with all fields added
+------------------------------
+
+<EditForm Model="@Employee">
+	<div class="form-group row">
+		<label for="lastName" class="col-sm-3">Last name: </label>
+		<InputText id="lastName" @bind-Value="@Employee.LastName" class="form-control col-sm-8" placeholder="Enter last name"></InputText>
+
+	</div>
+
+	<div class="form-group row">
+		<label for="firstName" class="col-sm-3">First name: </label>
+		<InputText id="firstName" class="form-control col-sm-8" @bind-Value="@Employee.FirstName" placeholder="Enter first name"></InputText>
+
+	</div>
+
+
+	<div class="form-group row">
+		<label for="birthdate" class="col-sm-3">Birthdate: </label>
+		<InputDate id="birthdate" class="form-control col-sm-8" @bind-Value="@Employee.BirthDate" placeholder="Enter birthdate"></InputDate>
+
+	</div>
+	<div class="form-group row">
+		<label for="email" class="col-sm-3">Email: </label>
+		<InputText id="email" class="form-control col-sm-8" @bind-Value="@Employee.Email" placeholder="Enter email"></InputText>
+
+	</div>
+
+	<div class="form-group row">
+		<label for="street" class="col-sm-3">Street: </label>
+		<InputText id="street" class="form-control col-sm-8" @bind-Value="@Employee.Street" placeholder="Enter street"></InputText>
+
+	</div>
+
+	<div class="form-group row">
+		<label for="zip" class="col-sm-3">Zip code: </label>
+		<InputText id="zip" class="form-control col-sm-8" @bind-Value="@Employee.Zip" placeholder="Enter zip code"></InputText>
+
+	</div>
+
+	<div class="form-group row">
+		<label for="city" class="col-sm-3">City: </label>
+		<InputText id="city" class="form-control col-sm-8" @bind-Value="@Employee.City" placeholder="Enter city"></InputText>
+
+	</div>
+
+	<div class="form-group row">
+		<label for="country" class="col-sm-3">Country: </label>
+		<InputSelect id="country" class="form-control col-sm-8" @bind-Value="@CountryId">
+			@foreach (var country in Countries)
+			{
+				<option value="@country.CountryId">@country.Name</option>
+			}
+		</InputSelect>
+	</div>
+
+	<div class="form-group row">
+		<label for="phonenumber" class="col-sm-3">Phone number: </label>
+		<InputText id="phonenumber" class="form-control col-sm-8" @bind-Value="@Employee.PhoneNumber" placeholder="Enter phone number"></InputText>
+	</div>
+
+	<div class="form-group row">
+		<label for="longitude" class="col-sm-3">Longitude: </label>
+		<InputNumber id="longitude" class="form-control col-sm-8" @bind-Value="@Employee.Longitude"></InputNumber>
+	</div>
+
+	<div class="form-group row">
+		<label for="latitude" class="col-sm-3">Latitude: </label>
+		<InputNumber id="latitude" class="form-control col-sm-8" @bind-Value="@Employee.Latitude"></InputNumber>
+	</div>
+
+	<div class="form-group row">
+		<label for="smoker" class=" offset-sm-3">
+			<InputCheckbox id="smoker" @bind-Value="@Employee.Smoker"></InputCheckbox>
+			&nbsp;Smoker
+		</label>
+	</div>
+
+	<div class="form-group row">
+		<label for="jobcategory" class="col-sm-3">Job category: </label>
+		<InputSelect id="jobcategory" class="form-control col-sm-8" @bind-Value="@JobCategoryId">
+			@foreach (var jobCategory in JobCategories)
+			{
+				<option value="@jobCategory.JobCategoryId">@jobCategory.JobCategoryName</option>
+			}
+		</InputSelect>
+	</div>
+
+	<div class="form-group row">
+		<label for="gender" class="col-sm-3">Gender: </label>
+		<InputSelect id="gender" class="form-control col-sm-8" @bind-Value=@Employee.Gender>
+			<option value="@(Gender.Male)">Male</option>
+			<option value="@(Gender.Female)">Female</option>
+			<option value="@(Gender.Other)">Other</option>
+		</InputSelect>
+	</div>
+
+	<div class="form-group row">
+		<label for="maritalstatus" class="col-sm-3">Marital status: </label>
+		<InputSelect id="maritalstatus" class="form-control col-sm-8" @bind-Value=@Employee.MaritalStatus>
+			<option value="@(MaritalStatus.Single)">Single</option>
+			<option value="@(MaritalStatus.Married)">Married</option>
+			<option value="@(MaritalStatus.Other)">Other</option>
+		</InputSelect>
+	</div>
+
+	<div class="form-group row">
+		<label for="joineddate" class="col-sm-3">Joined on: </label>
+		<InputDate id="joineddate" class="form-control col-sm-8" @bind-Value="@Employee.JoinedDate" placeholder="Enter date joined"></InputDate>
+	</div>
+
+	<div class="form-group row">
+		<label for="exitdate" class="col-sm-3">Left on: </label>
+		<InputDate id="exitdate" class="form-control col-sm-8" @bind-Value="@Employee.ExitDate" placeholder="Enter exit date"></InputDate>
+	</div>
+
+	<div class="form-group row">
+		<label for="comment" class="col-sm-3">Comment: </label>
+		<InputTextArea id="comment" class="form-control col-sm-8" @bind-Value="@Employee.Comment" placeholder="Enter comment"></InputTextArea>
+	</div>
+
+</EditForm>
+
+EmployeeDataService method implementations
+------------------------------------------
+
+public async Task<Employee> AddEmployee(Employee employee)
+{
+	var employeeJson =
+		new StringContent(JsonSerializer.Serialize(employee), Encoding.UTF8, "application/json");
+
+	var response = await _httpClient.PostAsync("api/employee", employeeJson);
+
+	if (response.IsSuccessStatusCode)
+	{
+		return await JsonSerializer.DeserializeAsync<Employee>(await response.Content.ReadAsStreamAsync());
+	}
+
+	return null;
+}
+
+public async Task UpdateEmployee(Employee employee)
+{
+	var employeeJson =
+		new StringContent(JsonSerializer.Serialize(employee), Encoding.UTF8, "application/json");
+   
+	await _httpClient.PutAsync("api/employee", employeeJson);
+}
+
+public async Task DeleteEmployee(int employeeId)
+{
+	await _httpClient.DeleteAsync($"api/employee/{employeeId}");
+}
+
+
+
+HandleValidSubmit
+-----------------
+
+protected async Task HandleValidSubmit()
+{
+ Saved = false;
+	Employee.CountryId = int.Parse(CountryId);
+	Employee.JobCategoryId = int.Parse(JobCategoryId);
+
+	if (Employee.EmployeeId == 0) //new
+	{
+		var addedEmployee = await EmployeeDataService.AddEmployee(Employee);
+		if (addedEmployee != null)
+		{
+			StatusClass = "alert-success";
+			Message = "New employee added successfully.";
+			Saved = true;
+		}
+		else
+		{
+			StatusClass = "alert-danger";
+			Message = "Something went wrong adding the new employee. Please try again.";
+			Saved = false;
+		}
+	}
+	else
+	{
+		await EmployeeDataService.UpdateEmployee(Employee);
+		StatusClass = "alert-success";
+		Message = "Employee updated successfully.";
+		Saved = true;
+	}
+}
+
+Demo 5
+------
+
+Updated Employee
+----------------
+
+public class Employee
+{
+	public int EmployeeId { get; set; }
+	[Required]
+	[StringLength(50, ErrorMessage = "First name is too long.")]
+	public string FirstName { get; set; }
+
+	[Required]
+	[StringLength(50, ErrorMessage = "Last name is too long.")]
+	public string LastName { get; set; }
+
+	public DateTime BirthDate { get; set; }
+
+	[Required]
+	[EmailAddress]
+	public string Email { get; set; }
+	public string Street { get; set; } 
+	public string Zip { get; set; }
+	public string City { get; set; }
+	public int CountryId { get; set; }
+	public Country Country { get; set; }
+	public string PhoneNumber { get; set; }
+	public bool Smoker { get; set; }
+	public MaritalStatus MaritalStatus { get; set; }
+	public Gender Gender { get; set; }
+	[StringLength(1000, ErrorMessage = "Comment length can't exceed 1000 characters.")]
+	public string Comment { get; set; }
+	public DateTime? JoinedDate { get; set; }
+	public DateTime? ExitDate { get; set; }
+
+	public int JobCategoryId { get; set; }
+	public JobCategory JobCategory { get; set; }
+
+	public double Latitude { get; set; }
+	public double Longitude { get; set; }
+}

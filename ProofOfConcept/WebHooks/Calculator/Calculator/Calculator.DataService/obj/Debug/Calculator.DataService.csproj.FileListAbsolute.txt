@@ -1,0 +1,11 @@
+C:\Users\Timot\OneDrive\Documents\TimsRepo\GitHub\Learning\ProofOfConcept\WebHooks\Calculator\Calculator\Calculator.DataService\bin\Debug\Calculator.DataService.dll.config
+C:\Users\Timot\OneDrive\Documents\TimsRepo\GitHub\Learning\ProofOfConcept\WebHooks\Calculator\Calculator\Calculator.DataService\bin\Debug\Calculator.DataService.dll
+C:\Users\Timot\OneDrive\Documents\TimsRepo\GitHub\Learning\ProofOfConcept\WebHooks\Calculator\Calculator\Calculator.DataService\bin\Debug\Calculator.DataService.pdb
+C:\Users\Timot\OneDrive\Documents\TimsRepo\GitHub\Learning\ProofOfConcept\WebHooks\Calculator\Calculator\Calculator.DataService\bin\Debug\Calculator.Core.dll
+C:\Users\Timot\OneDrive\Documents\TimsRepo\GitHub\Learning\ProofOfConcept\WebHooks\Calculator\Calculator\Calculator.DataService\bin\Debug\Calculator.Core.pdb
+C:\Users\Timot\OneDrive\Documents\TimsRepo\GitHub\Learning\ProofOfConcept\WebHooks\Calculator\Calculator\Calculator.DataService\bin\Debug\Calculator.Core.dll.config
+C:\Users\Timot\OneDrive\Documents\TimsRepo\GitHub\Learning\ProofOfConcept\WebHooks\Calculator\Calculator\Calculator.DataService\obj\Debug\Calculator.DataService.csprojAssemblyReference.cache
+C:\Users\Timot\OneDrive\Documents\TimsRepo\GitHub\Learning\ProofOfConcept\WebHooks\Calculator\Calculator\Calculator.DataService\obj\Debug\Calculator.DataService.csproj.CoreCompileInputs.cache
+C:\Users\Timot\OneDrive\Documents\TimsRepo\GitHub\Learning\ProofOfConcept\WebHooks\Calculator\Calculator\Calculator.DataService\obj\Debug\Calculator.DataService.csproj.CopyComplete
+C:\Users\Timot\OneDrive\Documents\TimsRepo\GitHub\Learning\ProofOfConcept\WebHooks\Calculator\Calculator\Calculator.DataService\obj\Debug\Calculator.DataService.dll
+C:\Users\Timot\OneDrive\Documents\TimsRepo\GitHub\Learning\ProofOfConcept\WebHooks\Calculator\Calculator\Calculator.DataService\obj\Debug\Calculator.DataService.pdb

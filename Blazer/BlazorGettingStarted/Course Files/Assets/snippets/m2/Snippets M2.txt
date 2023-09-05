@@ -1,0 +1,619 @@
+Module 2 Snippets
+-----------------
+
+Demo 3: Creating the first app
+------------------------------
+
+Sample data EmployeeOverview:
+-----------------------------
+
+public IEnumerable<Employee> Employees { get; set; }
+
+private List<Country> Countries { get; set; }
+ 
+private List<JobCategory> JobCategories { get; set; }
+
+private void InitializeJobCategories()
+{
+	JobCategories = new List<JobCategory>()
+	{
+		new JobCategory{JobCategoryId = 1, JobCategoryName = "Pie research"},
+		new JobCategory{JobCategoryId = 2, JobCategoryName = "Sales"},
+		new JobCategory{JobCategoryId = 3, JobCategoryName = "Management"},
+		new JobCategory{JobCategoryId = 4, JobCategoryName = "Store staff"},
+		new JobCategory{JobCategoryId = 5, JobCategoryName = "Finance"},
+		new JobCategory{JobCategoryId = 6, JobCategoryName = "QA"},
+		new JobCategory{JobCategoryId = 7, JobCategoryName = "IT"},
+		new JobCategory{JobCategoryId = 8, JobCategoryName = "Cleaning"},
+		new JobCategory{JobCategoryId = 9, JobCategoryName = "Bakery"},
+		new JobCategory{JobCategoryId = 9, JobCategoryName = "Bakery"}
+	};
+}
+
+private void InitializeCountries()
+{
+	Countries = new List<Country>
+	{
+		new Country {CountryId = 1, Name = "Belgium"},
+		new Country {CountryId = 2, Name = "Netherlands"},
+		new Country {CountryId = 3, Name = "USA"},
+		new Country {CountryId = 4, Name = "Japan"},
+		new Country {CountryId = 5, Name = "China"},
+		new Country {CountryId = 6, Name = "UK"},
+		new Country {CountryId = 7, Name = "France"},
+		new Country {CountryId = 8, Name = "Brazil"}
+	};
+}
+
+private void InitializeEmployees()
+{
+	var e1 = new Employee
+	{
+		CountryId = 1,
+		MaritalStatus = MaritalStatus.Single,
+		BirthDate = new DateTime(1989, 3, 11),
+		City = "Brussels",
+		Email = "bethany@bethanyspieshop.com",
+		EmployeeId = 1,
+		FirstName = "Bethany",
+		LastName = "Smith",
+		Gender = Gender.Female,
+		PhoneNumber = "324777888773",
+		Smoker = false,
+		Street = "Grote Markt 1",
+		Zip = "1000",
+		JobCategoryId = 1,
+		Comment = "Lorem Ipsum",
+		ExitDate = null,
+		JoinedDate = new DateTime(2015, 3, 1)
+	};
+
+	var e2 = new Employee
+	{
+		CountryId = 2,
+		MaritalStatus = MaritalStatus.Married,
+		BirthDate = new DateTime(1979, 1, 16),
+		City = "Antwerp",
+		Email = "gill@bethanyspieshop.com",
+		EmployeeId = 2,
+		FirstName = "Gill",
+		LastName = "Cleeren",
+		Gender = Gender.Female,
+		PhoneNumber = "33999909923",
+		Smoker = false,
+		Street = "New Street",
+		Zip = "2000",
+		JobCategoryId = 1,
+		Comment = "Lorem Ipsum",
+		ExitDate = null,
+		JoinedDate = new DateTime(2017, 12, 24)
+	};
+	Employees = new List<Employee> { e1, e2 };
+}
+
+
+EmployeeOverview Razor component 
+--------------------------------
+
+<h1 class="page-title">All employees</h1>
+
+@if (Employees == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th></th>
+                <th>Employee ID</th>
+                <th>First name</th>
+                <th>Last name</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var employee in Employees)
+            {
+                <tr>
+                    <td><img src="@($"https://gillcleerenpluralsight.blob.core.windows.net/person/{employee.EmployeeId}-small.jpg")" class="rounded-circle" /></td>
+                    <td>@employee.EmployeeId</td>
+                    <td>@employee.FirstName</td>
+                    <td>@employee.LastName</td>
+
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+Sample data EmployeeDetail:
+---------------------------
+
+protected override Task OnInitializedAsync()
+{
+
+	InitializeCountries();
+	InitializeJobCategories();
+	InitializeEmployees();
+
+	return base.OnInitializedAsync();
+}
+
+public IEnumerable<Employee> Employees { get; set; }
+
+private List<Country> Countries { get; set; }
+
+private List<JobCategory> JobCategories { get; set; }
+
+private void InitializeJobCategories()
+{
+	JobCategories = new List<JobCategory>()
+	{
+		new JobCategory{JobCategoryId = 1, JobCategoryName = "Pie research"},
+		new JobCategory{JobCategoryId = 2, JobCategoryName = "Sales"},
+		new JobCategory{JobCategoryId = 3, JobCategoryName = "Management"},
+		new JobCategory{JobCategoryId = 4, JobCategoryName = "Store staff"},
+		new JobCategory{JobCategoryId = 5, JobCategoryName = "Finance"},
+		new JobCategory{JobCategoryId = 6, JobCategoryName = "QA"},
+		new JobCategory{JobCategoryId = 7, JobCategoryName = "IT"},
+		new JobCategory{JobCategoryId = 8, JobCategoryName = "Cleaning"},
+		new JobCategory{JobCategoryId = 9, JobCategoryName = "Bakery"},
+		new JobCategory{JobCategoryId = 9, JobCategoryName = "Bakery"}
+	};
+}
+
+private void InitializeCountries()
+{
+	Countries = new List<Country>
+	{
+		new Country {CountryId = 1, Name = "Belgium"},
+		new Country {CountryId = 2, Name = "Netherlands"},
+		new Country {CountryId = 3, Name = "USA"},
+		new Country {CountryId = 4, Name = "Japan"},
+		new Country {CountryId = 5, Name = "China"},
+		new Country {CountryId = 6, Name = "UK"},
+		new Country {CountryId = 7, Name = "France"},
+		new Country {CountryId = 8, Name = "Brazil"}
+	};
+}
+
+private void InitializeEmployees()
+{
+	var e1 = new Employee
+	{
+		CountryId = 1,
+		MaritalStatus = MaritalStatus.Single,
+		BirthDate = new DateTime(1989, 3, 11),
+		City = "Brussels",
+		Email = "bethany@bethanyspieshop.com",
+		EmployeeId = 1,
+		FirstName = "Bethany",
+		LastName = "Smith",
+		Gender = Gender.Female,
+		PhoneNumber = "324777888773",
+		Smoker = false,
+		Street = "Grote Markt 1",
+		Zip = "1000",
+		JobCategoryId = 1,
+		Comment = "Lorem Ipsum",
+		ExitDate = null,
+		JoinedDate = new DateTime(2015, 3, 1)
+	};
+
+	var e2 = new Employee
+	{
+		CountryId = 2,
+		MaritalStatus = MaritalStatus.Married,
+		BirthDate = new DateTime(1979, 1, 16),
+		City = "Antwerp",
+		Email = "gill@bethanyspieshop.com",
+		EmployeeId = 2,
+		FirstName = "Gill",
+		LastName = "Cleeren",
+		Gender = Gender.Female,
+		PhoneNumber = "33999909923",
+		Smoker = false,
+		Street = "New Street",
+		Zip = "2000",
+		JobCategoryId = 1,
+		Comment = "Lorem Ipsum",
+		ExitDate = null,
+		JoinedDate = new DateTime(2017, 12, 24)
+	};
+	Employees = new List<Employee> { e1, e2 };
+}
+
+
+
+EmployeeDetail Razor Component:
+-------------------------------
+
+<h1 class="page-title">Details for @Employee.FirstName @Employee.LastName</h1>
+
+
+<div class="col-12 row">
+	<div class="col-2">
+		<img src="@($"https://gillcleerenpluralsight.blob.core.windows.net/person/{Employee.EmployeeId}.jpg")" class="img-responsive rounded-circle employee-detail-img" />
+	</div>
+	<div class="col-10 row">
+		<div class="col-xs-12 col-sm-8">
+			<div class="form-group row">
+				<label class="col-sm-4 col-form-label">Employee ID</label>
+				<div class="col-sm-8">
+					<label type="text" class="form-control-plaintext">@Employee.EmployeeId</label>
+				</div>
+			</div>
+			<div class="form-group row">
+				<label class="col-sm-4 col-form-label">First name</label>
+				<div class="col-sm-8">
+					<label type="text" readonly class="form-control-plaintext">@Employee.FirstName</label>
+				</div>
+			</div>
+
+			<div class="form-group row">
+				<label class="col-sm-4 col-form-label">Last name</label>
+				<div class="col-sm-8">
+					<label type="text" readonly class="form-control-plaintext">@Employee.LastName</label>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+Other fields for EmployeeDetail
+-------------------------------
+
+<div class="form-group row">
+	<label class="col-sm-4 col-form-label">Birthdate</label>
+	<div class="col-sm-8">
+		<label type="text" readonly class="form-control-plaintext">@Employee.BirthDate.ToShortDateString()</label>
+	</div>
+</div>
+
+<div class="form-group row">
+	<label class="col-sm-4 col-form-label">Email</label>
+	<div class="col-sm-8">
+		<label type="text" readonly class="form-control-plaintext">@Employee.Email</label>
+	</div>
+</div>
+
+<div class="form-group row">
+	<label class="col-sm-4 col-form-label">Street</label>
+	<div class="col-sm-8">
+		<label type="text" readonly class="form-control-plaintext">@Employee.Street</label>
+	</div>
+</div>
+
+<div class="form-group row">
+	<label class="col-sm-4 col-form-label">Zip</label>
+	<div class="col-sm-8">
+		<label type="text" readonly class="form-control-plaintext">@Employee.Zip</label>
+	</div>
+</div>
+
+<div class="form-group row">
+	<label class="col-sm-4 col-form-label">City</label>
+	<div class="col-sm-8">
+		<label type="text" readonly class="form-control-plaintext">@Employee.City</label>
+	</div>
+</div>
+
+<div class="form-group row">
+	<label class="col-sm-4 col-form-label">Phone number</label>
+	<div class="col-sm-8">
+		<label type="text" readonly class="form-control-plaintext">@Employee.PhoneNumber</label>
+	</div>
+</div>
+
+<div class="form-group row">
+	<label class="col-sm-4 col-form-label">Gender</label>
+	<div class="col-sm-8">
+		<label type="text" readonly class="form-control-plaintext">@Employee.Gender</label>
+	</div>
+</div>
+
+<div class="form-group row">
+	<label class="col-sm-4 col-form-label">Smoker</label>
+	<div class="col-sm-8">
+
+		@if (Employee.Smoker)
+		{
+			<label type="text" readonly class="form-control-plaintext">Yes</label>
+		}
+		else
+		{
+			<label type="text" readonly class="form-control-plaintext">No</label>
+
+		}
+	</div>
+</div>
+
+ <div class="form-group row">
+	<label class="col-sm-4 col-form-label">Joined us</label>
+	<div class="col-sm-8">
+		<label type="text" readonly class="form-control-plaintext">@Employee.JoinedDate?.ToShortDateString()</label>
+	</div>
+</div>
+
+<div class="form-group row">
+	<label class="col-sm-4 col-form-label">Left us</label>
+	<div class="col-sm-8">
+		<label type="text" readonly class="form-control-plaintext">@Employee.ExitDate?.ToShortDateString()</label>
+	</div>
+</div>
+
+
+Demo 4: Adding style
+--------------------
+
+CSS
+---
+
+/*!
+ * Start Bootstrap - Simple Sidebar (https://startbootstrap.com/template-overviews/simple-sidebar)
+ * Copyright 2013-2019 Start Bootstrap
+ * Licensed under MIT (https://github.com/BlackrockDigital/startbootstrap-simple-sidebar/blob/master/LICENSE)
+ */
+body {
+    overflow-x: hidden;
+    background-image: url('../images/pattern.png');
+    background-repeat: repeat;
+    font-family: 'Ubuntu', sans-serif;
+}
+
+nav {
+    background-color: #a593c2;
+    border-color: #a593c2;
+}
+
+#logo {
+    width: 80%;
+}
+
+#navbarSupportedContent {
+    height: 80px;
+}
+
+.navbar {
+    padding: 0;
+}
+
+.sidebar-logo {
+    height: 80px;
+    background-color: #a593c2;
+    border-color: #a593c2;
+    width: 240px;
+}
+
+
+/*profile picture*/
+.profile {
+    width: 240px;
+    overflow-y: visible;
+    position: absolute;
+}
+
+.profile-bg, .profile-picture {
+    width: 240px;
+    height: 240px;
+    position: absolute;
+}
+
+.profile-bg {
+    overflow: hidden;
+}
+
+    .profile-bg img {
+        width: 250px;
+        height: 250px;
+        filter: blur(16px);
+        -webkit-filter: blur(16px);
+        margin: -5px;
+        border: 0;
+    }
+
+.profile-picture img.account-photo {
+    width: 160px;
+    height: 160px;
+    margin-left: 40px;
+    margin-top: 40px;
+}
+
+.circle {
+    border-radius: 50%;
+}
+
+.menu {
+    position: absolute;
+    margin-top: 240px;
+}
+
+#sidebar-wrapper {
+    width: 240px;
+    min-height: 100vh;
+    margin-left: -15rem;
+    -webkit-transition: margin .25s ease-out;
+    -moz-transition: margin .25s ease-out;
+    -o-transition: margin .25s ease-out;
+    transition: margin .25s ease-out;
+}
+
+    #sidebar-wrapper .sidebar-heading {
+        padding: 0.875rem 1.25rem;
+        font-size: 1.2rem;
+    }
+
+    #sidebar-wrapper .list-group {
+        width: 15rem;
+    }
+
+.list-group-item.active, .list-group-item.active:active, .list-group-item.active:focus, .list-group-item.active:visited {
+    color: white;
+    background-color: #a593c2 !important;
+    border-color: #a593c2;
+    font-weight: bold;
+}
+
+.title {
+    color: white;
+    padding-left: 25px;
+}
+
+#page-content-wrapper {
+    min-width: 100vw;
+}
+
+.container-fluid {
+    padding: 25px;
+}
+
+#wrapper.toggled #sidebar-wrapper {
+    margin-left: 0;
+}
+
+@media (min-width: 768px) {
+    #sidebar-wrapper {
+        margin-left: 0;
+    }
+
+    #page-content-wrapper {
+        min-width: 0;
+        width: 100%;
+    }
+
+    #wrapper.toggled #sidebar-wrapper {
+        margin-left: -15rem;
+    }
+}
+
+.page-title {
+    color: #23cfa7;
+    font-size: 28px;
+}
+
+.table {
+    background-color: white;
+}
+
+.table-btn {
+    background-color: #23cfa7;
+    border-color: #23cfa7;
+    border-radius: 50%;
+}
+
+    .table-btn:hover, .table-btn:active {
+        color: #fff;
+        background-color: #a593c2 !important;
+        border-color: #a593c2 !important;
+    }
+
+.quick-add-btn {
+    font-size: 36px;
+    position: fixed;
+    right: 30px;
+    bottom: 30px;
+}
+
+.employee-detail, .employee-edit {
+    padding: 15px;
+    background-color: rgba(255, 255, 255, 0.6);
+}
+
+    .employee-detail .form-group {
+        margin-bottom: 0;
+    }
+
+.employee-detail-img {
+    width: 150px;
+    height: auto;
+}
+
+.track-order-map {
+    width: 350px;
+    height: 500px;
+    flex-shrink: 0;
+}
+
+.edit-btn {
+    background-color: #23cfa7;
+    border-color: #23cfa7;
+    color: #fff;
+}
+
+    .edit-btn:hover, .edit-btn:active {
+        color: #fff;
+        background-color: #a593c2;
+        border-color: #a593c2;
+    }
+
+.edit-outline-btn {
+    border-color: #23cfa7;
+}
+
+    .edit-outline-btn:hover, .edit-outline-btn:active {
+        color: #fff;
+        background-color: #a593c2 !important;
+        border-color: #a593c2 !important;
+}
+
+
+
+MainLayout
+----------
+@inherits LayoutComponentBase
+
+<div class="d-flex" id="wrapper">
+
+    <NavMenu />
+
+    <div id="page-content-wrapper">
+
+        <nav class="navbar navbar-expand-lg navbar-light border-bottom">
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <h3 class="title">Bethany's Pie Shop HRM </h3>
+                <ul class="navbar-nav ml-auto mt-2 mt-lg-0">
+                </ul>
+            </div>
+        </nav>
+
+        <div class="container-fluid">
+
+            @Body
+
+        </div>
+    </div>
+
+</div>
+
+
+NavMenu
+-------
+
+
+<div class="bg-light" id="sidebar-wrapper">
+    <div class="sidebar-logo">
+        <img class="img-responsive" id="logo" src="images/bethanylogo.png" />
+    </div>
+    <div class="profile">
+        <div class="profile-bg">
+            <img class="img-responsive" src="images/profilePicture.jpg" />
+        </div>
+        <div class="profile-picture">
+            <img class="img-responsive circle account-photo" src="images/profilePicture.jpg" />
+        </div>
+    </div>
+    <div class="menu list-group list-group-flush">
+        <NavLink class="list-group-item list-group-item-action bg-light" href="/" Match="NavLinkMatch.All">
+            <span class="oi oi-home" aria-hidden="true"></span> Home
+        </NavLink>
+        <NavLink class="list-group-item list-group-item-action bg-light" href="/employeeoverview">
+            <span class="oi oi-list-rich" aria-hidden="true"></span> Employees
+        </NavLink>
+       
+    </div>
+</div>
+

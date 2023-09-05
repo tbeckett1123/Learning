@@ -1,0 +1,16 @@
+﻿nav {
+    background-color: #a593c2;
+    border-color: #a593c2;
+}
+
+#navbarSupportedContent {
+    height: 80px;
+}
+
+.navbar {
+    padding: 0;
+}
+
+.container-fluid {
+    padding: 25px;
+}

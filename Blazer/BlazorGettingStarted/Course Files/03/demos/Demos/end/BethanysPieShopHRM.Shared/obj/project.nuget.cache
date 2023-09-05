@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "4rGRVHv0YnlXy3PFFC2gn1M1pJ5iA2v6fiS9ocv6dgo41FTUe0hi91ZdXEXBTrW71c+q2n9+MiWEfhNWH3532g==",
+  "success": true,
+  "projectFilePath": "D:\\Dropbox (Personal)\\Work\\PluralSight\\blazor-getting-started\\update\\Production\\m3\\Demos\\end\\BethanysPieShopHRM.Shared\\BethanysPieShopHRM.Shared.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\gill\\.nuget\\packages\\microsoft.netcore.platforms\\1.1.0\\microsoft.netcore.platforms.1.1.0.nupkg.sha512",
+    "C:\\Users\\gill\\.nuget\\packages\\netstandard.library\\2.0.3\\netstandard.library.2.0.3.nupkg.sha512",
+    "C:\\Users\\gill\\.nuget\\packages\\system.componentmodel.annotations\\4.7.0\\system.componentmodel.annotations.4.7.0.nupkg.sha512"
+  ],
+  "logs": []
+}
