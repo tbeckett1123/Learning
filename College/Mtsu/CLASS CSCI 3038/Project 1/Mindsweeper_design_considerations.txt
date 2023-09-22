@@ -1,0 +1,44 @@
+Your task is to write a Python program that will allow someone to play a text-based Minesweeper game
+in the terminal. Your program only needs to implement a basic 9x9 board with 10 mines randomly
+placed. It should be fully playable, however, flagging is an optional feature. After winning or losing, your
+program should display the entire board uncovered and write out, to a separate text file, that full board
+uncovered, and the list of moves made by the user.
+Hints
+    • Things to think about:
+        o How to determine if the player has won? (Keeping a count of something could help here)
+        o How to determine if the player has lost? (Digging a mine is bad)
+        o The player should not see the hidden values unless they have opened the cell.
+        o Remember, if the cell is blank, all adjacent cells that do not contain mines should be
+          automatically opened (think recursion)
+          
+What do I need?
+I. Setup
+   A. I need a 9x9 grid
+      1. The grid cell should define:
+         i.   The grid should mark a bomb, blank, or number.              
+         ii.  The grid should mark if it is flagged safe.
+         iii. The grid should mark if hidden or revealed.            
+   B. I need a way to determine which cells in the grid will contain the mines.
+      1. Use a random number generator from 0 to 81.  The numbers generated will be the cells with mines
+      2. I need a way to determine if the cell should be empty or contain a number
+      3. For cells that contain a number, I need to be able to determine the mine count for the contigous cells.
+
+Setting up the grid and tracking cell information.  This will be easiest to track using a class, so I'm going to
+look up how to creat a class in python.
+
+While counting the touching cells that that contain a mine, it was necessary to determine if the cell was on the
+boundries of the grid.
+
+The count should be a method not a stored value to prevent inaccurate value.
+
+rule to clear cells after click that is not a mine.  real all cells that are blank.  stop on cells that are touching.
+you don't have to worry about mines they will be surrounded by numbers.
+
+for printing the mine field grid, I had to look up how to print without a newline printing.
+
+Determining is the player won. A simple mine count will not do. There are 2 winning conditions either the player
+must have cleared all safe cells or all mines must be flagged.
+
+For testing I dumped the grid to the screen "row column cell_type is_flagged"
+
+For clearing the fields correctly it took work.  I initially had issue with it not exposing touching fields and all blank fields.

@@ -1,0 +1,39 @@
+# Name: Timothy Beckett
+# Class: CSCI 3038 - Python
+# Project 4: Minesweeper
+
+The objective is to turn the text based minesweeper from project 1 into a gui based game using TKinter
+
+I need a board.
+    I will need to catch the window close event to stop the stopwatch thread.    
+
+I need Stopwatch to time the game.
+    The stopwatch should give real-time updates to a label to show to the user that will not interupt game play.
+    To accomplish that I'm going to use threading.
+
+The board will consist of cells that will be buttons.
+    I will need a click and right click event.
+    The right click event will toggle the flag on the cell.
+    The click event will:
+        check mark the cell as revealed.
+        once the cell is flagged is should be safe to click on.
+        it should check if the cell is a boomer.
+        if the cell is touching a boomer it should show a count as to the number of boomers the cell touches.
+        if it's not a boomer it should trigger a routine to check the surrounding cells and reveal the cells.
+        
+The thread for the stopwatch has been most problimatic.  I had to move thread management out of the stopwatch class.
+At this point the stopwatch class isn't realy doing anything, but when I tried to remove it, the label disapeared from 
+the window. I have not figured that out yet. I have the thread for the stopwatch working now, but now I cannot get the
+thread to stop gracefully.  For now, I'm moving on to the the events.  I'll go back and fix these issues.
+
+I removed the stopwatch class, and moved the code to the Board file.  That fixed most of the threading issues.
+The biggest threading issue that I encountered was when I called the Join function the app would hang. it seems
+that passing in the running variable directly was the problem.  I passed in the board class instance to the update function
+and that fixed the problem.
+
+The other issue I had with threading was closing the thread when I clicked the "x".  After much lamentations and wailing and 
+nashing of teeth, I found the daemon=True fixed the problem.  I need to get moving forward with Project 5 and my thread did
+not have any resources that needed to be manually cleaned up, so I went with that option.
+
+I had a bugger of a time trying to get a message in the top frame between the reset button and the time label.
+I went another route and created a modal dialog.

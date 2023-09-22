@@ -1,0 +1,134 @@
+Script started on 2023-06-04 22:51:23-05:00 [TERM="xterm-256color" TTY="/dev/pts/0" COLUMNS="128" LINES="54"]
+pw[?2004h(base) ]0;jovyan@jupyter-tdb2q: ~/Project1[01;32mjovyan@jupyter-tdb2q[00m:[01;34m~/Project1[00m$ pwd
+[?2004l/home/jovyan/Project1
+[?2004h(base) ]0;jovyan@jupyter-tdb2q: ~/Project1[01;32mjovyan@jupyter-tdb2q[00m:[01;34m~/Project1[00m$ ls -l
+[?2004ltotal 8
+-rw-r--r-- 1 jovyan users 2397 Jun  4 22:49 project1.c
+-rw-r--r-- 1 jovyan users    0 Jun  4 22:51 project1.txt
+-rw-r--r-- 1 jovyan users  202 Jun  4 18:41 test.txt
+[?2004h(base) ]0;jovyan@jupyter-tdb2q: ~/Project1[01;32mjovyan@jupyter-tdb2q[00m:[01;34m~/Project1[00m$ cat -n project1.c
+[?2004l     1	/* Name:    Timothy Beckett
+     2	 * Project: 1
+     3	 * Description: Write a C program that takes a single command-line argument and produces the same output as the xxd   
+     4	 * program withthe same argument. You must include meaningful comments on your code. You must name your program file as 
+     5	 * project1.c. 
+     6	 * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+     7	#include <stdio.h>
+     8	#include <ctype.h>
+     9	
+    10	int offset[16] = { 30, 28, 26, 24, 22, 20, 18, 16, 14, 12, 10, 8, 6, 4, 2, 0 };
+    11	
+    12	void InitArray(int size, char* buffer);
+    13	
+    14	int main(int argc, char** argv)
+    15	{
+    16	    // Note that the first element in argv is "./Project1".  The file name will be in the 2nd element.
+    17	        
+    18	    char input;    
+    19	    char output[17];
+    20	    FILE* filePtr;
+    21	    int line = 0, // line counter.
+    22	    spacer = 0,   // tracking spaces for hex dump.    
+    23	    count = 0;    // tracking the character count for the line.
+    24	        
+    25	    filePtr = fopen(argv[1], "r");
+    26	    
+    27	    InitArray(17, output);
+    28	    
+    29	    // print 1st line line number.
+    30	    printf("%07x0: ", line);
+    31	    
+    32	    // read characters till the end of the file. 
+    33	    while(fscanf(filePtr, "%c", &input) != EOF)
+    34	    {
+    35	        
+    36	        output[count] = input;
+    37	        count++;
+    38	        
+    39	        // handling line feeds
+    40	        if (input == 10) 
+    41	        {
+    42	            output[count - 1] = '.';
+    43	            printf("0a");
+    44	        }
+    45	        // check if printable character.
+    46	        else if (!isprint(input))
+    47	        {
+    48	            printf(".");
+    49	        }                
+    50	        else
+    51	        {
+    52	            printf("%x", input);
+    53	        }
+    54	        
+    55	        // print a space every 2nd character.
+    56	        spacer = (spacer + 1) % 2;
+    57	            
+    58	        if (spacer == 0)
+    59	            printf(" ");
+    60	        
+    61	        // dump the buffer and advance to a new line very 16th character.
+    62	        if (count == 16)
+    63	        {
+    64	            line++;
+    65	            printf(" %s\n%07x0: ", output, line);
+    66	            count = 0;            
+    67	            InitArray(17, output);
+    68	        }        
+    69	    }
+    70	    
+    71	    if (count < 16)
+    72	    {        
+    73	
+    74	        // print place holders to maintain formatting        
+    75	        for (int i = offset[count - 1]; i > 0; i--)
+    76	            printf(" ");
+    77	             
+    78	        printf("   %s\n", output);        
+    79	    }
+    80	        
+    81	    fclose(filePtr);
+    82	    
+    83	    return 0;
+    84	}
+    85	
+    86	void InitArray(int size, char* buffer)
+    87	{
+    88	    for (int i = 0; i < size; i++)
+    89	        buffer[i] = '\0';
+    90	}[?2004h(base) ]0;jovyan@jupyter-tdb2q: ~/Project1[01;32mjovyan@jupyter-tdb2q[00m:[01;34m~/Project1[00m$ gcc project1.c -o po[Kroject1
+[?2004l[?2004h(base) ]0;jovyan@jupyter-tdb2q: ~/Project1[01;32mjovyan@jupyter-tdb2q[00m:[01;34m~/Project1[00m$ xxd test.txt
+[?2004l00000000: 496d 706f 7274 616e 7420 4869 6e74 3a20  Important Hint: 
+00000010: 0a0a 5468 6520 6973 7072 696e 7428 2920  ..The isprint() 
+00000020: 6675 6e63 7469 6f6e 2063 6865 636b 7320  function checks 
+00000030: 7768 6574 6865 7220 6120 6368 6172 6163  whether a charac
+00000040: 7465 7220 0a69 7320 6120 7072 696e 7461  ter .is a printa
+00000050: 626c 6520 6368 6172 6163 7465 7220 6f72  ble character or
+00000060: 206e 6f74 2e0a 4368 6563 6b20 6d6f 7265   not..Check more
+00000070: 2069 6e66 6f72 6d61 7469 6f6e 2069 6e3a   information in:
+00000080: 200a 6874 7470 733a 2f2f 7777 772e 7072   .https://www.pr
+00000090: 6f67 7261 6d69 7a2e 636f 6d2f 632d 7072  ogramiz.com/c-pr
+000000a0: 6f67 7261 6d6d 696e 672f 6c69 6272 6172  ogramming/librar
+000000b0: 792d 6675 6e63 7469 6f6e 2f63 7479 7065  y-function/ctype
+000000c0: 2e68 2f69 7370 7269 6e74                 .h/isprint
+[?2004h(base) ]0;jovyan@jupyter-tdb2q: ~/Project1[01;32mjovyan@jupyter-tdb2q[00m:[01;34m~/Project1[00m$ x[K./project1 po[Kroject1.c > actual[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K[K./project1 test.txt
+[?2004l00000000: 496d 706f 7274 616e 7420 4869 6e74 3a20  Important Hint: 
+00000010: 0a0a 5468 6520 6973 7072 696e 7428 2920  ..The isprint() 
+00000020: 6675 6e63 7469 6f6e 2063 6865 636b 7320  function checks 
+00000030: 7768 6574 6865 7220 6120 6368 6172 6163  whether a charac
+00000040: 7465 7220 0a69 7320 6120 7072 696e 7461  ter .is a printa
+00000050: 626c 6520 6368 6172 6163 7465 7220 6f72  ble character or
+00000060: 206e 6f74 2e0a 4368 6563 6b20 6d6f 7265   not..Check more
+00000070: 2069 6e66 6f72 6d61 7469 6f6e 2069 6e3a   information in:
+00000080: 200a 6874 7470 733a 2f2f 7777 772e 7072   .https://www.pr
+00000090: 6f67 7261 6d69 7a2e 636f 6d2f 632d 7072  ogramiz.com/c-pr
+000000a0: 6f67 7261 6d6d 696e 672f 6c69 6272 6172  ogramming/librar
+000000b0: 792d 6675 6e63 7469 6f6e 2f63 7479 7065  y-function/ctype
+000000c0: 2e68 2f69 7370 7269 6e74                .h/isprint
+[?2004h(base) ]0;jovyan@jupyter-tdb2q: ~/Project1[01;32mjovyan@jupyter-tdb2q[00m:[01;34m~/Project1[00m$ xxd project1.c > ac[K[K[K[K> expectedOutput.txt
+[?2004l[?2004h(base) ]0;jovyan@jupyter-tdb2q: ~/Project1[01;32mjovyan@jupyter-tdb2q[00m:[01;34m~/Project1[00m$ x[K./project1 project1.c > ac t[K[KtualOutput.txt
+[?2004l[?2004h(base) ]0;jovyan@jupyter-tdb2q: ~/Project1[01;32mjovyan@jupyter-tdb2q[00m:[01;34m~/Project1[00m$ diff expectedOutput.txt actualOutput.txt 
+[?2004l[?2004h(base) ]0;jovyan@jupyter-tdb2q: ~/Project1[01;32mjovyan@jupyter-tdb2q[00m:[01;34m~/Project1[00m$ exit
+[?2004lexit
+
+Script done on 2023-06-04 22:53:56-05:00 [COMMAND_EXIT_CODE="0"]
